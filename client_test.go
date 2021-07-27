@@ -134,17 +134,17 @@ func TestClient_BatchCallsProviderWithCorrectParams(t *testing.T) {
 					s,
 				)
 			}
-			actualPayload := i.(batch)
-			if len(actualPayload.Members) != 2 {
+			payload := i.(batch)
+			if len(payload.Members) != 2 {
 				t.Errorf(
 					"expected payload length to be 2, but was %d",
-					len(actualPayload.Members),
+					len(payload.Members),
 				)
 			}
-			if actualPayload.UpdateExisting == true {
+			if payload.UpdateExisting == true {
 				t.Error("expected update_existing to be false, was true")
 			}
-			for _, member := range actualPayload.Members {
+			for _, member := range payload.Members {
 				if member.EmailAddress != "test@test.com" {
 					t.Errorf(
 						"expected all members to have email adress test@test.com, but found %s",
@@ -175,19 +175,19 @@ func TestClient_BatchWithUpdateCallsProviderWithCorrectParams(t *testing.T) {
 					s,
 				)
 			}
-			actualPayload := i.(batch)
-			if len(actualPayload.Members) != 2 {
+			payload := i.(batch)
+			if len(payload.Members) != 2 {
 				t.Errorf(
 					"expected payload length to be 2, but was %d",
-					len(actualPayload.Members),
+					len(payload.Members),
 				)
 			}
-			if actualPayload.UpdateExisting == false {
+			if payload.UpdateExisting == false {
 				t.Error(
 					"expected update_existing to be true, but was false",
 				)
 			}
-			for _, member := range actualPayload.Members {
+			for _, member := range payload.Members {
 				if member.EmailAddress != "test@test.com" {
 					t.Errorf(
 						"expected all members to have email adress test@test.com, but found %s",
@@ -200,4 +200,57 @@ func TestClient_BatchWithUpdateCallsProviderWithCorrectParams(t *testing.T) {
 	}
 	client := NewMockClient(&mock)
 	client.BatchWithUpdate(testListId, members)
+}
+
+func TestClient_DeleteListCallsProviderWithCorrectParams(t *testing.T) {
+	testListId := "test-id"
+	mock := MailChimpProviderMock{
+		DeleteMock: func(s string) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s", testListId) {
+				t.Errorf(
+					"expected uri to be /lists/%s, but was %s",
+					testListId,
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.DeleteList(testListId)
+}
+
+func TestClient_UpdateListCallsProviderWithCorrectParams(t *testing.T) {
+	testListId := "test-id"
+	mock := MailChimpProviderMock{
+		PatchMock: func(s string, i interface{}) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s", testListId) {
+				t.Errorf(
+					"expected uri to be /lists/%s, but was %s",
+					testListId,
+					s,
+				)
+			}
+			payload := i.(List)
+			if payload.Name != "Test" {
+				t.Errorf(
+					"expected list name to be 'Test', but was '%s'",
+					payload.Name,
+				)
+			}
+			if payload.PermissionReminder != "This is a test" {
+				t.Errorf(
+					"expected list permission reminder to be 'This is a test', but was '%s'",
+					payload.PermissionReminder,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	list := List{
+		Name:               "Test",
+		PermissionReminder: "This is a test",
+	}
+	client.UpdateList(testListId, list)
 }
