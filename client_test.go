@@ -94,6 +94,94 @@ func TestClient_BatchTestProviderCall(t *testing.T) {
 	}
 }
 
+func TestClient_CreateListTestProviderCall(t *testing.T) {
+	mock := MailChimpProviderMock{
+		PostMock: func(s string, i interface{}) ([]byte, error) {
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	list := List{
+		Name:               "Test",
+		PermissionReminder: "Permission reminder",
+	}
+	client.CreateList(list)
+	if mock.PostCalls != 1 {
+		t.Errorf(
+			"expected provider Post() to have been called once, was called %d times",
+			mock.PostCalls,
+		)
+	}
+}
+
+func TestClient_FetchListsTestProviderCall(t *testing.T) {
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.FetchLists()
+	if mock.GetCalls != 1 {
+		t.Errorf(
+			"expected provider Get() to have been called once, was called %d times",
+			mock.PostCalls,
+		)
+	}
+}
+
+func TestClient_FetchListTestProviderCall(t *testing.T) {
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.FetchList("test-id")
+	if mock.GetCalls != 1 {
+		t.Errorf(
+			"expected provider Get() to have been called once, was called %d times",
+			mock.PostCalls,
+		)
+	}
+}
+
+func TestClient_UpdateListTestProviderCall(t *testing.T) {
+	mock := MailChimpProviderMock{
+		PatchMock: func(s string, i interface{}) ([]byte, error) {
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	list := List{
+		Name:               "Test",
+		PermissionReminder: "Permission reminder",
+	}
+	client.UpdateList("test-id", list)
+	if mock.PatchCalls != 1 {
+		t.Errorf(
+			"expected provider Patch() to have been called once, was called %d times",
+			mock.PostCalls,
+		)
+	}
+}
+
+func TestClient_DeleteListTestProviderCall(t *testing.T) {
+	mock := MailChimpProviderMock{
+		DeleteMock: func(s string) ([]byte, error) {
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.DeleteList("test-id")
+	if mock.DeleteCalls != 1 {
+		t.Errorf(
+			"expected provider Delete() to have been called once, was called %d times",
+			mock.PostCalls,
+		)
+	}
+}
+
 func TestClient_BatchWithUpdateTestProviderCall(t *testing.T) {
 	mock := MailChimpProviderMock{
 		PostMock: func(s string, i interface{}) ([]byte, error) {
