@@ -158,13 +158,13 @@ The `mailchimp.MailChimpProviderMock` struct is specified below.
 
 ```go
 type MailChimpProviderMock struct {
-	PostMock    func(string, interface{}) ([]byte, error)
+	PostMock    func(uri string, payload interface{}) ([]byte, error)
 	PostCalls   int
-	GetMock     func(string) ([]byte, error)
+	GetMock     func(uri string) ([]byte, error)
 	GetCalls    int
-	PatchMock   func(string, interface{}) ([]byte, error)
+	PatchMock   func(uri string, payload interface{}) ([]byte, error)
 	PatchCalls  int
-	DeleteMock  func(string) ([]byte, error)
+	DeleteMock  func(uri string) ([]byte, error)
 	DeleteCalls int
 }
 ```
