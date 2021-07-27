@@ -150,3 +150,21 @@ if err := chimp.BatchWithUpdate("some-id", members); err != nil {
     return handleErr(err)
 }
 ```
+
+## Testing
+While running automated tests, it is very likely that you do not want `go-mailchimp` to send real requests to the MailChimp Marketing API. To avoid this, one can use the `mailchimp.NewMockClient` to instantiate a client in place of the `mailchimp.NewClient` function. The mock client function requires a value of the type `mailchimp.MailChimpProviderMock` to be sent in as a parameter. Using this mock, you can define the behaviour of the MailChimp endpoints for `GET`, `PATCH`, `POST` and `DELETE` calls. Thus, if you need to test how your software behaves when an error is returned from `go-mailchimp` you can simply define a function that returns an arbitrary error. By inspecting for example the `PostCalls` field on the `mailchimp.MailChimpProviderMock` you can also see how many `POST` requests were made during the test. 
+
+The `mailchimp.MailChimpProviderMock` struct is specified below.
+
+```go
+type MailChimpProviderMock struct {
+	PostMock    func(string, interface{}) ([]byte, error)
+	PostCalls   int
+	GetMock     func(string) ([]byte, error)
+	GetCalls    int
+	PatchMock   func(string, interface{}) ([]byte, error)
+	PatchCalls  int
+	DeleteMock  func(string) ([]byte, error)
+	DeleteCalls int
+}
+```
