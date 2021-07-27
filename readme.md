@@ -177,5 +177,5 @@ mock := mailchimp.MailChimpProviderMock{
 		return nil, errors.New("something went wrong")
 	},
 }
-client := mailchimp.NewMockClient(&mock)
+chimpMock := mailchimp.NewMockClient(&mock)
 ```
