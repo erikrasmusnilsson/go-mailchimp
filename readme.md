@@ -9,7 +9,7 @@ chimp := mailchimp.NewClient("secret-key", "region")
 For information regarding how to generate an API key and find your region, please refer to the MailChimp documentation.
 
 ## Ping MailChimp
-To make sure that the client is properly set up, you can use the `Ping` receiver function. This returns a boolean and an error. If the returned boolean has a value of `true` then you are all set to go! Otherwise, there may be a problem with internet connectivity or the API key. 
+To make sure that the client is properly set up, you can use the `Ping` receiver function. This returns a boolean and an error. If the returned boolean has a value of `true` then you are all set to go! Otherwise, a problem ocurred whilst connecting to MailChimp with the given API key and region.
 
 ```go
 chimp := mailchimp.NewClient("secret-key", "region")
@@ -28,7 +28,7 @@ You can then use chaining receiver functions on the builder to set the parameter
 * `builder.Name("The name of your list")`
 * `builder.PermissionReminder("The permission reminder for your list")`
 
-Moreover, a list must also contain a contact and campaign defaults. These are instantiated manually. One example for each is given below, together with how to wire them up to the list builder. If any of the fields marked with a *required* comment are not specified when `Build` is called, then an error will be returned. 
+Moreover, a list must also contain a contact and campaign defaults. These are instantiated manually. One example for each is given below, together with how to wire them up to the list builder. If any of the fields marked with a *required* comment are not specified when `Build` is called, then an error will be returned. It is for this reason that using the `ListBuilder` is advised, it will ensure that all the required data has been filled in before contacting MailChimp.
 
 ```go
 contact := mailchimp.Contact{
@@ -178,4 +178,10 @@ mock := mailchimp.MailChimpProviderMock{
 	},
 }
 chimpMock := mailchimp.NewMockClient(&mock)
+
+[perform some operations]
+
+if mock.PostCalls != 1 {
+    t.Errorf("expected 1 PostCall, got %d", mock.PostCalls)
+}
 ```
