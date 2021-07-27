@@ -151,6 +151,17 @@ if err := chimp.BatchWithUpdate("some-id", members); err != nil {
 }
 ```
 
+## Fetching a members tags 
+It is possible to fetch all the tags associated with a given member for a given list. However, it is required that the lists ID and the members email address is known beforehand. To fetch the tags, simply use the `FetchMemberTags` receiver function on your `mailchimp.Client`. As example is given below. Please note that this function will only return an error is something went wrong on the MailChimp API side.
+
+```go
+chimp := mailchimp.NewClient("key", "region")
+tags, err := chimp.FetchMemberTags("list-id", "member@email.com")
+if err != nil {
+    return handleErr(err)
+}
+```
+
 ## Adding/removing Tags
 In order to add or remove tags for a given member of a given list, the members email address and the lists ID must be known beforehand. Before the operation can be performed, the client must first build a set of tags to either add or remove. This is simply done with `TagBuilder` as shown below.
 
