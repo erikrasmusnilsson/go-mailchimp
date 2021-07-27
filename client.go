@@ -21,6 +21,7 @@ type Client interface {
 	BatchWithUpdate(id string, members []Member) error
 	FetchMemberTags(listID, memberEmail string) ([]Tag, error)
 	UpdateMemberTags(listID, memberEmail string, tags []Tag) error
+	UpdateMemberTagsSync(listID, memberEmail string, tags []Tag) error
 }
 
 type client struct {
@@ -200,7 +201,25 @@ func (c client) UpdateMemberTags(listID, memberEmail string, tags []Tag) error {
 			listID,
 			hashMd5(strings.ToLower(memberEmail)),
 		),
-		tags,
+		updateMemberTagsPayload{
+			Tags:      tags,
+			IsSyncing: false,
+		},
+	)
+	return err
+}
+
+func (c client) UpdateMemberTagsSync(listID, memberEmail string, tags []Tag) error {
+	_, err := c.provider.Post(
+		fmt.Sprintf(
+			"/lists/%s/members/%s/tags",
+			listID,
+			hashMd5(strings.ToLower(memberEmail)),
+		),
+		updateMemberTagsPayload{
+			Tags:      tags,
+			IsSyncing: true,
+		},
 	)
 	return err
 }
