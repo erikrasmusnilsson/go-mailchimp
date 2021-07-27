@@ -134,14 +134,17 @@ func TestClient_BatchCallsProviderWithCorrectParams(t *testing.T) {
 					s,
 				)
 			}
-			actualPayload := i.([]batchedMember)
-			if len(actualPayload) != 2 {
+			actualPayload := i.(batch)
+			if len(actualPayload.Members) != 2 {
 				t.Errorf(
 					"expected payload length to be 2, but was %d",
-					len(actualPayload),
+					len(actualPayload.Members),
 				)
 			}
-			for _, member := range actualPayload {
+			if actualPayload.UpdateExisting == true {
+				t.Error("expected update_existing to be false, was true")
+			}
+			for _, member := range actualPayload.Members {
 				if member.EmailAddress != "test@test.com" {
 					t.Errorf(
 						"expected all members to have email adress test@test.com, but found %s",
@@ -172,14 +175,19 @@ func TestClient_BatchWithUpdateCallsProviderWithCorrectParams(t *testing.T) {
 					s,
 				)
 			}
-			actualPayload := i.([]batchedMember)
-			if len(actualPayload) != 2 {
+			actualPayload := i.(batch)
+			if len(actualPayload.Members) != 2 {
 				t.Errorf(
 					"expected payload length to be 2, but was %d",
-					len(actualPayload),
+					len(actualPayload.Members),
 				)
 			}
-			for _, member := range actualPayload {
+			if actualPayload.UpdateExisting == false {
+				t.Error(
+					"expected update_existing to be true, but was false",
+				)
+			}
+			for _, member := range actualPayload.Members {
 				if member.EmailAddress != "test@test.com" {
 					t.Errorf(
 						"expected all members to have email adress test@test.com, but found %s",
