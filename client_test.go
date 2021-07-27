@@ -254,3 +254,72 @@ func TestClient_UpdateListCallsProviderWithCorrectParams(t *testing.T) {
 	}
 	client.UpdateList(testListId, list)
 }
+
+func TestClient_FetchListCallsProviderWithCorrectParams(t *testing.T) {
+	testListId := "test-id"
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s", testListId) {
+				t.Errorf(
+					"expected uri to be /lists/%s, but was %s",
+					testListId,
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.FetchList(testListId)
+}
+
+func TestClient_FetchListsCallsProviderWithCorrectParams(t *testing.T) {
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			if s != "/lists" {
+				t.Errorf(
+					"expected uri to be /lists, but was %s",
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.FetchLists()
+}
+
+func TestClient_CreateListCallsProviderWithCorrectParams(t *testing.T) {
+	list := List{
+		Name:               "Test list",
+		PermissionReminder: "permission reminder",
+	}
+	mock := MailChimpProviderMock{
+		PostMock: func(s string, i interface{}) ([]byte, error) {
+			if s != "/lists" {
+				t.Errorf(
+					"expected uri to be /lists, but was %s",
+					s,
+				)
+			}
+			payload := i.(List)
+			if payload.Name != list.Name {
+				t.Errorf(
+					"expected list name to be '%s', but was '%s'",
+					list.Name,
+					payload.Name,
+				)
+			}
+			if payload.PermissionReminder != list.PermissionReminder {
+				t.Errorf(
+					"expected list permission reminder to be '%s', but was '%s'",
+					list.PermissionReminder,
+					payload.PermissionReminder,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.CreateList(list)
+}
