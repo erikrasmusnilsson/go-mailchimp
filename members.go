@@ -23,10 +23,6 @@ type MemberBuilder struct {
 	obj Member
 }
 
-type MemberDirector interface {
-	construct() (Member, error)
-}
-
 func (sb MemberBuilder) Build() (Member, error) {
 	if invalidParams, valid := validate(sb.obj); valid {
 		return sb.obj, nil

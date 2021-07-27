@@ -151,7 +151,10 @@ func (c client) batch(id string, members []Member, update bool) error {
 			MergeFields:  member.MergeFields,
 		})
 	}
-	_, err := c.provider.Post(fmt.Sprintf("/lists/%s", id), data)
+	_, err := c.provider.Post(fmt.Sprintf("/lists/%s", id), batch{
+		Members:        data,
+		UpdateExisting: update,
+	})
 	return err
 }
 

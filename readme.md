@@ -100,9 +100,53 @@ updatedList, err := chimp.UpdateList("some-id", list)
 ```
 
 ## Deleting a list
-In order to delete a list from your MailChimp account, you must know the ID of that list. Once the ID has been acquired, the clients `DeleteList` receiver function can be invoked to perform the action. This function returns an error if an error was returned from MailChimp. 
+In order to delete a list from your MailChimp account, you must know the ID of the list beforehand. Once the ID has been acquired, the clients `DeleteList` receiver function can be invoked to perform the action. This function returns an error if an error was returned from MailChimp. 
 
 ```go
 chimp := mailchimp.NewClient("key", "region")
 err := chimp.DeleteList("some-id")
+```
+
+## Adding members to a list
+There are two ways in which members can be added to a list. Both are described below, but first we will cover how to create new member structs. 
+
+### Creating a member
+To create a member, there is another builder that can be used. Much like the `ListBuilder`, the `MemberBuilder` has a required field, namely `EmailAddress`. For MailChimp merge fields, such as `FNAME` and `PHONE`, one can use the `MergeField` receiver function on the `MemberBuilder`. A simple example of its usage is shown below.
+
+```go
+member, err := mailchimp.MemberBuilder{}.
+    EmailAddress("test@test.com").
+    StatusSubscribed().
+    MergeField("FNAME", "Test").
+    MergeField("LNAME", "Smith").
+    Build()
+```
+
+The available statuses for members are listed as the corresponding receiver function below.
+
+* `StatusSubscribed()`
+* `StatusUnsubscribed()`
+* `StatusPending()`
+* `StatusCleaned()`
+
+### `Batch`
+Using `Batch` to add members will only work if all the members are new. Meaning, you cannot update an existing member if the `Batch` function is used. The prerequisite knowledge to use `Batch` is the ID of the list that the members should be added to as well as the members that should be added. Please note that a maximum of **500** members can be batched for a single request as per MailChimps' specifications, if any more than that is sent to `Batch` then an error will be returned. A simple usage example for the `Batch` function is shown below.
+
+```go
+chimp := mailchimp.NewClient("key", "region")
+members := createMembers()
+if err := chimp.Batch("some-id", members); err != nil {
+    return handleErr(err)
+}
+```
+
+### `BatchWithUpdate`
+The `BatchWithUpdate` function is very similar to `Batch`, with the difference being that `BatchWithUpdate` will update already existing members if they are present in the payload. Hence, if a member was subscribed with a `Batch` call, then if the same email address is found with a `BatchWithUpdate` call but with a status of `unsubscribed` then the member will be unsubscribed from the list. 
+
+```go
+chimp := mailchimp.NewClient("key", "region")
+members := createMembers()
+if err := chimp.BatchWithUpdate("some-id", members); err != nil {
+    return handleErr(err)
+}
 ```
