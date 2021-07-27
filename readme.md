@@ -168,3 +168,14 @@ type MailChimpProviderMock struct {
 	DeleteCalls int
 }
 ```
+
+An example of using the mock is shown below.
+
+```go
+mock := mailchimp.MailChimpProviderMock{
+	PostMock: func(s string, i interface{}) ([]byte, error) {
+		return nil, errors.New("something went wrong")
+	},
+}
+client := mailchimp.NewMockClient(&mock)
+```
