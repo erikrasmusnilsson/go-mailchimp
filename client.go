@@ -1,10 +1,13 @@
 package mailchimp
 
 import (
+	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type Client interface {
@@ -16,6 +19,8 @@ type Client interface {
 	DeleteList(string) error
 	Batch(string, []Member) error
 	BatchWithUpdate(id string, members []Member) error
+	FetchMemberTags(listID, memberEmail string) ([]Tag, error)
+	UpdateMemberTags(listID, memberEmail string, tags []Tag) error
 }
 
 type client struct {
@@ -158,6 +163,48 @@ func (c client) batch(id string, members []Member, update bool) error {
 	return err
 }
 
+type memberTagsResponse struct {
+	Tags []Tag `json:"tags"`
+}
+
+func (c client) FetchMemberTags(listID, memberEmail string) ([]Tag, error) {
+	tags := memberTagsResponse{}
+	body, err := c.provider.Get(
+		fmt.Sprintf(
+			"/lists/%s/members/%s/tags",
+			listID,
+			hashMd5(strings.ToLower(memberEmail)),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(body, &tags); err != nil {
+		return nil, err
+	}
+	for i := range tags.Tags {
+		tags.Tags[i].Status = tagStatusActive
+	}
+	return tags.Tags, nil
+}
+
+type updateMemberTagsPayload struct {
+	Tags      []Tag `json:"tags"`
+	IsSyncing bool  `json:"is_syncing"`
+}
+
+func (c client) UpdateMemberTags(listID, memberEmail string, tags []Tag) error {
+	_, err := c.provider.Post(
+		fmt.Sprintf(
+			"/lists/%s/members/%s/tags",
+			listID,
+			hashMd5(strings.ToLower(memberEmail)),
+		),
+		tags,
+	)
+	return err
+}
+
 func authorization(key string) string {
 	method := "Basic"
 	k := base64.
@@ -168,4 +215,9 @@ func authorization(key string) string {
 			),
 		)
 	return fmt.Sprintf("%s %s", method, k)
+}
+
+func hashMd5(data string) string {
+	h := md5.Sum([]byte(data))
+	return hex.EncodeToString(h[:])
 }
