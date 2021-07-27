@@ -32,20 +32,20 @@ Moreover, a list must also contain a contact and campaign defaults. These are in
 
 ```go
 contact := mailchimp.Contact{
-    Address1: "Company address", // required
-    Zip: "123 45", // required
-    City: "Company city", // required
-    State: "Company state", // required
-    Country: "Company country", // required
+    Address1: "Company address",    // required
+    Zip: "123 45",                  // required
+    City: "Company city",           // required
+    State: "Company state",         // required
+    Country: "Company country",     // required
     Address2: "Secondary address",
-    Company: "Company name", // required
+    Company: "Company name",        // required
 }
 
 campaignDefaults := mailchimp.CampaignDefaults{
-    FromName: "Name", // required
-    FromEmail: "your@email.com", // required
-    Subject: "A subject", // required
-    Language: "Some language", // required
+    FromName: "Name",               // required
+    FromEmail: "your@email.com",    // required
+    Subject: "A subject",           // required
+    Language: "Some language",      // required
 }
 
 list, err := mailchimp.ListBuilder{}.
@@ -141,7 +141,7 @@ if err := chimp.Batch("some-id", members); err != nil {
 ```
 
 ### `BatchWithUpdate`
-The `BatchWithUpdate` function is very similar to `Batch`, with the difference being that `BatchWithUpdate` will update already existing members if they are present in the payload. Hence, if a member was subscribed with a `Batch` call, then if the same email address is found with a `BatchWithUpdate` call but with a status of `unsubscribed` then the member will be unsubscribed from the list. 
+The `BatchWithUpdate` function is very similar to `Batch`, with the difference being that `BatchWithUpdate` will update already existing members of the MailChimp list. Hence, if a member was subscribed with a `Batch` call, then if the same email address is found with a `BatchWithUpdate` call but with a status of `unsubscribed` then the member will be unsubscribed from the list. 
 
 ```go
 chimp := mailchimp.NewClient("key", "region")
