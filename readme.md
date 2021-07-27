@@ -23,12 +23,12 @@ To create a list, start with initialising a list builder like so:
 ```go
 builder := mailchimp.ListBuilder{}
 ```
-You can then use chaining receiver functions on the builder to set the parameters of the new list. There are a few required fields for lists, if these are not specified when `Build` is called, then an error will be returned. The required fields are listed below.
+You can then use chaining receiver functions on the builder to set the parameters of the new list. There are a few required fields for lists, if these are not specified when `Build` is called, then an error will be returned. It is for this reason that using the `ListBuilder` is advised, it will ensure that all the required data has been filled in before contacting MailChimp. The required fields are listed below.
 
 * `builder.Name("The name of your list")`
 * `builder.PermissionReminder("The permission reminder for your list")`
 
-Moreover, a list must also contain a contact and campaign defaults. These are instantiated manually. One example for each is given below, together with how to wire them up to the list builder. If any of the fields marked with a *required* comment are not specified when `Build` is called, then an error will be returned. It is for this reason that using the `ListBuilder` is advised, it will ensure that all the required data has been filled in before contacting MailChimp.
+Moreover, a list must also contain a contact and campaign defaults. These are instantiated manually. One example for each is given below, together with how to wire them up to the list builder. If any of the fields marked with a *required* comment are not specified when `Build` is called, then an error will be returned.
 
 ```go
 contact := mailchimp.Contact{
