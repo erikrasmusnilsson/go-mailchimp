@@ -79,7 +79,7 @@ lists, err := chimp.FetchLists()
 ```
 
 ## Fetching a single list
-It is also possible to fetch a single list, given that the ID of is already known. This can be achieved using the `FetchList` client receiver function. This function returns both a list and an error, but the error will only be non-nil if an error was returned from the MailChimp Marketing API or if there was an issue in unmarshalling the response. 
+It is also possible to fetch a single list, given that its ID is known beforehand. This can be achieved using the `FetchList` client receiver function. This function returns both a list and an error, but the error will only be non-nil if an error was returned from the MailChimp Marketing API or if there was an issue in unmarshalling the response. 
 
 ```go
 chimp := mailchimp.NewClient("key", "region")
