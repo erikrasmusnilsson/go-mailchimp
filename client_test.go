@@ -411,3 +411,119 @@ func TestClient_CreateListCallsProviderWithCorrectParams(t *testing.T) {
 	client := NewMockClient(&mock)
 	client.CreateList(list)
 }
+
+func TestClient_FetchMemberTagsCallsProviderWithCorrectParams(t *testing.T) {
+	expectedMemberID := hashMd5("test@test.com")
+	expectedListID := "list-id"
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s/members/%s/tags", expectedListID, expectedMemberID) {
+				t.Errorf(
+					"expected uri to be /lists/%s/members/%s/tags, but was %s",
+					expectedListID,
+					expectedMemberID,
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.FetchMemberTags("list-id", "test@test.com")
+}
+
+func TestClient_UpdateMemberTagsCallsProviderWithCorrectParams(t *testing.T) {
+	expectedMemberID := hashMd5("test@test.com")
+	expectedListID := "list-id"
+	tag := Tag{
+		Name:   "Test",
+		Status: "active",
+	}
+	mock := MailChimpProviderMock{
+		PostMock: func(s string, i interface{}) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s/members/%s/tags", expectedListID, expectedMemberID) {
+				t.Errorf(
+					"expected uri to be /lists/%s/members/%s/tags, but was %s",
+					expectedListID,
+					expectedMemberID,
+					s,
+				)
+			}
+			payload := i.(updateMemberTagsPayload)
+			if payload.IsSyncing {
+				t.Error("expected is_syncing to be false, but was true")
+			}
+			if len(payload.Tags) != 1 {
+				t.Errorf(
+					"expected number of tags to be 1, but was %d",
+					len(payload.Tags),
+				)
+			}
+			if payload.Tags[0].Name != tag.Name {
+				t.Errorf(
+					"expected tag name to be '%s', but was '%s'",
+					tag.Name,
+					payload.Tags[0].Name,
+				)
+			}
+			if payload.Tags[0].Status != tag.Status {
+				t.Errorf(
+					"expected tag status to be '%s', but was '%s'",
+					tag.Status,
+					payload.Tags[0].Status,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.UpdateMemberTags("list-id", "test@test.com", []Tag{tag})
+}
+
+func TestClient_UpdateMemberTagsSyncCallsProviderWithCorrectParams(t *testing.T) {
+	expectedMemberID := hashMd5("test@test.com")
+	expectedListID := "list-id"
+	tag := Tag{
+		Name:   "Test",
+		Status: "active",
+	}
+	mock := MailChimpProviderMock{
+		PostMock: func(s string, i interface{}) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s/members/%s/tags", expectedListID, expectedMemberID) {
+				t.Errorf(
+					"expected uri to be /lists/%s/members/%s/tags, but was %s",
+					expectedListID,
+					expectedMemberID,
+					s,
+				)
+			}
+			payload := i.(updateMemberTagsPayload)
+			if !payload.IsSyncing {
+				t.Error("expected is_syncing to be true, but was false")
+			}
+			if len(payload.Tags) != 1 {
+				t.Errorf(
+					"expected number of tags to be 1, but was %d",
+					len(payload.Tags),
+				)
+			}
+			if payload.Tags[0].Name != tag.Name {
+				t.Errorf(
+					"expected tag name to be '%s', but was '%s'",
+					tag.Name,
+					payload.Tags[0].Name,
+				)
+			}
+			if payload.Tags[0].Status != tag.Status {
+				t.Errorf(
+					"expected tag status to be '%s', but was '%s'",
+					tag.Status,
+					payload.Tags[0].Status,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.UpdateMemberTagsSync("list-id", "test@test.com", []Tag{tag})
+}
