@@ -71,6 +71,22 @@ func TestClient_PingMailChimpFailure(t *testing.T) {
 	}
 }
 
+func TestClient_PingCallsProviderWithCorrectParams(t *testing.T) {
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			if s != "/ping" {
+				t.Errorf(
+					"expected uri to be '/ping', but was '%s'",
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewMockClient(&mock)
+	client.Ping()
+}
+
 func TestClient_Batch500Limit(t *testing.T) {
 	mock := MailChimpProviderMock{
 		PostMock: func(s string, i interface{}) ([]byte, error) {
