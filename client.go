@@ -11,7 +11,7 @@ import (
 )
 
 type Client interface {
-	Ping() (bool, error)
+	Ping() error
 	CreateList(List) (List, error)
 	FetchLists() ([]List, error)
 	FetchList(string) (List, error)
@@ -56,16 +56,19 @@ func NewMockClient(provider MailChimpProvider) Client {
 	}
 }
 
-func (c client) Ping() (bool, error) {
+func (c client) Ping() error {
 	var status pingResponse
 	body, err := c.provider.Get("/ping")
 	if err != nil {
-		return false, err
+		return err
 	}
 	if err := json.Unmarshal(body, &status); err != nil {
-		return false, err
+		return err
 	}
-	return status.HealthStatus == "Everything's Chimpy!", err
+	if status.HealthStatus != "Everything's Chimpy!" {
+		return errors.New("unexpected pong response from MailChimp API")
+	}
+	return nil
 }
 
 func (c client) CreateList(l List) (List, error) {

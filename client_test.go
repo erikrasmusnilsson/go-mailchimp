@@ -1,6 +1,7 @@
 package mailchimp
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -14,6 +15,58 @@ func TestAthorization(t *testing.T) {
 			"expected auth to be '%s', but was '%s'",
 			expectedAuth,
 			actualAuth,
+		)
+	}
+}
+
+func TestClient_PingSuccess(t *testing.T) {
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			return []byte("{\"health_status\":\"Everything's Chimpy!\"}"), nil
+		},
+	}
+	client := NewMockClient(&mock)
+	err := client.Ping()
+	if err != nil {
+		t.Errorf(
+			"expected no error to be returned from Ping invocation but '%s' was returned",
+			err.Error(),
+		)
+	}
+	if mock.GetCalls != 1 {
+		t.Errorf(
+			"expected 1 get call to provider, but there was %d",
+			mock.GetCalls,
+		)
+	}
+}
+
+func TestClient_PingFailureToReadResponse(t *testing.T) {
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			return []byte("{\"status\":\"Everything's Chimpy!\"}"), nil
+		},
+	}
+	client := NewMockClient(&mock)
+	err := client.Ping()
+	if err == nil {
+		t.Error(
+			"expected error to be returned from Ping invocation but none was returned",
+		)
+	}
+}
+
+func TestClient_PingMailChimpFailure(t *testing.T) {
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			return nil, errors.New("something went wrong")
+		},
+	}
+	client := NewMockClient(&mock)
+	err := client.Ping()
+	if err == nil {
+		t.Error(
+			"expected error to be returned from Ping invocation but none was returned",
 		)
 	}
 }

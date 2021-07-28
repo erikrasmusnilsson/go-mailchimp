@@ -9,12 +9,12 @@ chimp := mailchimp.NewClient("key", "region")
 For information regarding how to generate an API key and find your region, please refer to the MailChimp documentation.
 
 ## Ping MailChimp
-To make sure that the client is properly set up, you can use the `Ping` receiver function. This returns a boolean and an error. If the returned boolean has a value of `true` then you are all set to go! Otherwise, a problem ocurred whilst connecting to MailChimp with the given API key and region.
+To make sure that the client is properly set up, you can use the `Ping` receiver function. This returns an error if something went wrong whilst sending the **ping**, examples of what could go wrong is a loss in internet connectivity or an invalid API key. If the returned error is `nil`, then everything is ready to go with the client.
 
 ```go
 chimp := mailchimp.NewClient("key", "region")
-if up, _ := chimp.Ping(); !up {
-    return
+if err := chimp.Ping(); err != nil {
+    return handleErr(err)
 }
 ```
 
