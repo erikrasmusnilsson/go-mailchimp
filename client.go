@@ -13,7 +13,7 @@ import (
 type Client interface {
 	Ping() (bool, error)
 	CreateList(List) (List, error)
-	FetchLists() (listCollection, error)
+	FetchLists() ([]List, error)
 	FetchList(string) (List, error)
 	UpdateList(string, List) (List, error)
 	DeleteList(string) error
@@ -80,16 +80,16 @@ func (c client) CreateList(l List) (List, error) {
 	return list, nil
 }
 
-func (c client) FetchLists() (listCollection, error) {
+func (c client) FetchLists() ([]List, error) {
 	lists := listCollection{}
 	body, err := c.provider.Get("/lists")
 	if err != nil {
-		return lists, err
+		return lists.Lists, err
 	}
 	if err := json.Unmarshal(body, &lists); err != nil {
-		return lists, err
+		return lists.Lists, err
 	}
-	return lists, nil
+	return lists.Lists, nil
 }
 
 func (c client) FetchList(id string) (List, error) {
