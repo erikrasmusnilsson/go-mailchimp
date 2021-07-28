@@ -4,7 +4,7 @@ This is a simple package that wraps the v3 MailChimp Marketing API. The current 
 ## Creating a client 
 The client is a data structure with receiver functions for communicating with the MailChimp Marketing API. To create a new client, all you need is the API key you wish to use as well as the region of your MailChimp account. After the client has been created, it does not require any closing as it does not keep a constant connection to MailChimp. Rather, it sends separate HTTP requests for each operation the client performs. 
 ```go
-chimp := mailchimp.NewClient("secret-key", "region")
+chimp := mailchimp.NewClient("key", "region")
 ```
 For information regarding how to generate an API key and find your region, please refer to the MailChimp documentation.
 
@@ -12,7 +12,7 @@ For information regarding how to generate an API key and find your region, pleas
 To make sure that the client is properly set up, you can use the `Ping` receiver function. This returns a boolean and an error. If the returned boolean has a value of `true` then you are all set to go! Otherwise, a problem ocurred whilst connecting to MailChimp with the given API key and region.
 
 ```go
-chimp := mailchimp.NewClient("secret-key", "region")
+chimp := mailchimp.NewClient("key", "region")
 if up, _ := chimp.Ping(); !up {
     return
 }
@@ -83,7 +83,7 @@ It is also possible to fetch a single list, given that its ID is known beforehan
 
 ```go
 chimp := mailchimp.NewClient("key", "region")
-list, err := chimp.FetchList("some-list-id")
+list, err := chimp.FetchList("list-id")
 ```
 
 ## Updating an existing list
@@ -91,12 +91,12 @@ To update the information regarding an existing list, the clients `UpdateList` r
 
 ```go
 chimp := mailchimp.NewClient("key", "region")
-list, err := chimp.FetchList("some-id")
+list, err := chimp.FetchList("list-id")
 if err != nil {
     return handleErr(err)
 }
 list.Name = "New and improved name"
-updatedList, err := chimp.UpdateList("some-id", list)
+updatedList, err := chimp.UpdateList("list-id", list)
 ```
 
 ## Deleting a list
@@ -104,7 +104,7 @@ In order to delete a list from your MailChimp account, you must know the ID of t
 
 ```go
 chimp := mailchimp.NewClient("key", "region")
-err := chimp.DeleteList("some-id")
+err := chimp.DeleteList("list-id")
 ```
 
 ## Adding members to a list
@@ -135,7 +135,7 @@ Using `Batch` to add members will only work if all the members are new. Meaning,
 ```go
 chimp := mailchimp.NewClient("key", "region")
 members := createMembers()
-if err := chimp.Batch("some-id", members); err != nil {
+if err := chimp.Batch("list-id", members); err != nil {
     return handleErr(err)
 }
 ```
@@ -146,7 +146,7 @@ The `BatchWithUpdate` function is very similar to `Batch`, with the difference b
 ```go
 chimp := mailchimp.NewClient("key", "region")
 members := createMembers()
-if err := chimp.BatchWithUpdate("some-id", members); err != nil {
+if err := chimp.BatchWithUpdate("list-id", members); err != nil {
     return handleErr(err)
 }
 ```
