@@ -124,10 +124,10 @@ member, err := mailchimp.MemberBuilder{}.
 
 The available statuses for members are listed as the corresponding receiver function below.
 
-* `StatusSubscribed()`
-* `StatusUnsubscribed()`
-* `StatusPending()`
-* `StatusCleaned()`
+* `builder.StatusSubscribed()`
+* `builder.StatusUnsubscribed()`
+* `builder.StatusPending()`
+* `builder.StatusCleaned()`
 
 ### `Batch`
 Using `Batch` to add members will only work if all the members are new. Meaning, you cannot update an existing member if the `Batch` function is used. The prerequisite knowledge to use `Batch` is the ID of the list that the members should be added to as well as the members that should be added. Please note that a maximum of **500** members can be batched for a single request as per MailChimps' specifications, if any more than that is sent to `Batch` then an error will be returned. A simple usage example for the `Batch` function is shown below.
@@ -174,8 +174,8 @@ tag, err := mailchimp.TagBuilder{}.
 
 The `Build` receiver function will return an error if the tags name has not been properly specified. There are also two possible statuses for a tag, `active` and `inactive`. Their corresponding builder receiver functions are listed below.
 
-* `StatusActive()`
-* `StatusInactive()`
+* `builder.StatusActive()`
+* `builder.StatusInactive()`
 
 Setting a tags status to `inactive` means that if the tag already exists on the member for the specified list at MailChimp, then that tag will be removed from the member. Setting the status as `active` simply means that the tag will be added to the member. 
 
