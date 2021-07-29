@@ -218,7 +218,7 @@ mock := mailchimp.MailChimpProviderMock{
 }
 chimpMock := mailchimp.NewMockClient(&mock)
 
-[perform some operations]
+// perform some actions/operations here
 
 if mock.PostCalls != 1 {
     t.Errorf("expected 1 PostCall, got %d", mock.PostCalls)
