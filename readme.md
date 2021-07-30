@@ -227,7 +227,7 @@ if mock.PostCalls != 1 {
 ```
 
 ### Mocking the entire client
-Furthermore, to mock the entire `mailchimp.Client` value, you can use the `mailchimp.ClientMock` which satisfies the interface for a regular `mailchimp.Client` but it leaves the application developer to define its behaviour. Any of the receiver functions can be mocked, and all of them is paired with a counter that signifies the amount of times the function has been called thus far. The usage of `mailchimp.ClientMock` is very similar to that of `mailchimp.MailChimpProviderMock` and an example is showcased below.
+Furthermore, to mock the entire `mailchimp.Client` value, you can use the `mailchimp.ClientMock` which satisfies the interface for a regular `mailchimp.Client` but it leaves the application developer to define its behaviour. Any of the receiver functions can be mocked, and all of them are paired with a counter that signifies the amount of times the function has been called thus far. The usage of `mailchimp.ClientMock` is very similar to that of `mailchimp.MailChimpProviderMock` and an example is showcased below.
 
 ```go
 mock := mailchimp.ClientMock{
