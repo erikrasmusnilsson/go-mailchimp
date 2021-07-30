@@ -191,7 +191,8 @@ if err := chimp.UpdateMemberTags("list-id", "member@email.com", tags); err != ni
 There is also another version of `UpdateMemberTags` called `UpdateMemberTagsSync`. Using `UpdateMemberTagsSync` will make sure that any automations at MailChimp based on tags are **not** ran during the update. Please note that this also means that using `UpdateMemberTags` to update the tags will cause these automations to run, if any are set up. Please note that both of these receiver functions will only return an error if one occured on the MailChimp API side.
 
 ## Testing
-While running automated tests, it is very likely that you do not want `go-mailchimp` to send real requests to the MailChimp Marketing API. To avoid this, one can use the `mailchimp.NewMockClient` to instantiate a client in place of the `mailchimp.NewClient` function. The mock client function requires a value of the type `mailchimp.MailChimpProviderMock` to be sent in as a parameter. Using this mock, you can define the behaviour of the MailChimp endpoints for `GET`, `PATCH`, `POST` and `DELETE` calls. Thus, if you need to test how your software behaves when an error is returned from `go-mailchimp` you can simply define a function that returns an arbitrary error. By inspecting for example the `PostCalls` field on the `mailchimp.MailChimpProviderMock` you can also see how many `POST` requests were made during the test. 
+## Mocking the MailChimp provider
+While running automated tests, it is very likely that you do not want `go-mailchimp` to send real requests to the MailChimp Marketing API. To avoid this, one can use the `mailchimp.NewCustomDependencyClient` to instantiate a client in place of the `mailchimp.NewClient` function. This function requires a value of the type `mailchimp.MailChimpProviderMock` to be sent in as a parameter. Using this mock, you can define the behaviour of the MailChimp endpoints for `GET`, `PATCH`, `POST` and `DELETE` calls. Thus, if you need to test how your software behaves when an error is returned from `go-mailchimp` you can simply define a function that returns an arbitrary error. By inspecting for example the `PostCalls` field on the `mailchimp.MailChimpProviderMock` you can also see how many `POST` requests were made during the test. 
 
 The `mailchimp.MailChimpProviderMock` struct is specified below.
 
@@ -222,5 +223,51 @@ chimpMock := mailchimp.NewMockClient(&mock)
 
 if mock.PostCalls != 1 {
     t.Errorf("expected 1 PostCall, got %d", mock.PostCalls)
+}
+```
+
+### Mocking the entire client
+Furthermore, to mock the entire `mailchimp.Client` value, you can use the `mailchimp.ClientMock` which satisfies the interface for a regular `mailchimp.Client` but it leaves the application developer to define its behaviour. Any of the receiver functions can be mocked, and all of them is paired with a counter that signifies the amount of times the function has been called thus far. The usage of `mailchimp.ClientMock` is very similar to that of `mailchimp.MailChimpProviderMock` and an example is showcased below.
+
+```go
+mock := mailchimp.ClientMock{
+    PingMock: func() error {
+        return errors.New("could not connect to MailChimp")
+    }
+}
+
+// inject the dependency and perform testing
+
+if mock.PingCalls != 1 {
+    t.Errorf("expected 1 call to Ping, but got %d", mock.PingCalls)
+}
+```
+
+The `mailchimp.ClientMock` struct is shown below.
+
+```go
+type ClientMock struct {
+	PingMock                  func() error
+	PingCalls                 int
+	CreateListMock            func(List) (List, error)
+	CreateListCalls           int
+	FetchListsMock            func() ([]List, error)
+	FetchListsCalls           int
+	FetchListMock             func(string) (List, error)
+	FetchListCalls            int
+	UpdateListMock            func(string, List) (List, error)
+	UpdateListCalls           int
+	DeleteListMock            func(string) error
+	DeleteListCalls           int
+	BatchMock                 func(string, []Member) error
+	BatchCalls                int
+	BatchWithUpdateMock       func(string, []Member) error
+	BatchWithUpdateCalls      int
+	FetchMemberTagsMock       func(string, string) ([]Tag, error)
+	FetchMemberTagsCalls      int
+	UpdateMemberTagsMock      func(string, string, []Tag) error
+	UpdateMemberTagsCalls     int
+	UpdateMemberTagsSyncMock  func(string, string, []Tag) error
+	UpdateMemberTagsSyncCalls int
 }
 ```

@@ -25,7 +25,7 @@ func TestClient_PingSuccess(t *testing.T) {
 			return []byte("{\"health_status\":\"Everything's Chimpy!\"}"), nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	err := client.Ping()
 	if err != nil {
 		t.Errorf(
@@ -47,7 +47,7 @@ func TestClient_PingFailureToReadResponse(t *testing.T) {
 			return []byte("{\"status\":\"Everything's Chimpy!\"}"), nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	err := client.Ping()
 	if err == nil {
 		t.Error(
@@ -62,7 +62,7 @@ func TestClient_PingMailChimpFailure(t *testing.T) {
 			return nil, errors.New("something went wrong")
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	err := client.Ping()
 	if err == nil {
 		t.Error(
@@ -83,7 +83,7 @@ func TestClient_PingCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.Ping()
 }
 
@@ -93,7 +93,7 @@ func TestClient_Batch500Limit(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	members := make([]Member, 0, 501)
 	for i := 0; i < 501; i++ {
 		member := Member{EmailAddress: "test@test.com"}
@@ -119,7 +119,7 @@ func TestClient_BatchWithUpdate500Limit(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	members := make([]Member, 0, 501)
 	for i := 0; i < 501; i++ {
 		member := Member{EmailAddress: "test@test.com"}
@@ -145,7 +145,7 @@ func TestClient_BatchTestProviderCall(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	members := make([]Member, 0, 2)
 	for i := 0; i < 2; i++ {
 		member := Member{EmailAddress: "test@test.com"}
@@ -169,7 +169,7 @@ func TestClient_CreateListTestProviderCall(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	list := List{
 		Name:               "Test",
 		PermissionReminder: "Permission reminder",
@@ -189,7 +189,7 @@ func TestClient_FetchListsTestProviderCall(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.FetchLists()
 	if mock.GetCalls != 1 {
 		t.Errorf(
@@ -205,7 +205,7 @@ func TestClient_FetchListTestProviderCall(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.FetchList("test-id")
 	if mock.GetCalls != 1 {
 		t.Errorf(
@@ -221,7 +221,7 @@ func TestClient_UpdateListTestProviderCall(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	list := List{
 		Name:               "Test",
 		PermissionReminder: "Permission reminder",
@@ -241,7 +241,7 @@ func TestClient_DeleteListTestProviderCall(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.DeleteList("test-id")
 	if mock.DeleteCalls != 1 {
 		t.Errorf(
@@ -257,7 +257,7 @@ func TestClient_BatchWithUpdateTestProviderCall(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	members := make([]Member, 0, 2)
 	for i := 0; i < 2; i++ {
 		member := Member{EmailAddress: "test@test.com"}
@@ -312,7 +312,7 @@ func TestClient_BatchCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.Batch(testListId, members)
 }
 
@@ -355,7 +355,7 @@ func TestClient_BatchWithUpdateCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.BatchWithUpdate(testListId, members)
 }
 
@@ -373,7 +373,7 @@ func TestClient_DeleteListCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.DeleteList(testListId)
 }
 
@@ -404,7 +404,7 @@ func TestClient_UpdateListCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	list := List{
 		Name:               "Test",
 		PermissionReminder: "This is a test",
@@ -426,7 +426,7 @@ func TestClient_FetchListCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.FetchList(testListId)
 }
 
@@ -442,7 +442,7 @@ func TestClient_FetchListsCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.FetchLists()
 }
 
@@ -477,7 +477,7 @@ func TestClient_CreateListCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.CreateList(list)
 }
 
@@ -497,7 +497,7 @@ func TestClient_FetchMemberTagsCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.FetchMemberTags("list-id", "test@test.com")
 }
 
@@ -545,7 +545,7 @@ func TestClient_UpdateMemberTagsCallsProviderWithCorrectParams(t *testing.T) {
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.UpdateMemberTags("list-id", "test@test.com", []Tag{tag})
 }
 
@@ -593,6 +593,6 @@ func TestClient_UpdateMemberTagsSyncCallsProviderWithCorrectParams(t *testing.T)
 			return nil, nil
 		},
 	}
-	client := NewMockClient(&mock)
+	client := NewCustomDependencyClient(&mock)
 	client.UpdateMemberTagsSync("list-id", "test@test.com", []Tag{tag})
 }

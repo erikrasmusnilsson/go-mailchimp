@@ -50,7 +50,7 @@ func NewClient(key, region string) Client {
 	}
 }
 
-func NewMockClient(provider MailChimpProvider) Client {
+func NewCustomDependencyClient(provider MailChimpProvider) Client {
 	return client{
 		provider: provider,
 	}
