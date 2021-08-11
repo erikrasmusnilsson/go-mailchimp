@@ -1,8 +1,12 @@
 package mailchimp
 
 import (
-	"errors"
 	"fmt"
+)
+
+var (
+	NullList      = List{}
+	NullListSlice = []List{}
 )
 
 type Contact struct {
@@ -48,22 +52,22 @@ type ListBuilder struct {
 
 func (lb ListBuilder) Build() (List, error) {
 	if invalidParams, valid := validate(lb.obj); !valid {
-		return lb.obj, errors.New(fmt.Sprintf(
+		return NullList, fmt.Errorf(
 			"could not build list due to invalid parameters %v",
 			invalidParams,
-		))
+		)
 	}
 	if invalidParams, valid := validate(lb.obj.CampaignDefaults); !valid {
-		return lb.obj, errors.New(fmt.Sprintf(
+		return NullList, fmt.Errorf(
 			"could not build list due to invalid campaign defaults parameters %v",
 			invalidParams,
-		))
+		)
 	}
 	if invalidParams, valid := validate(lb.obj.Contact); !valid {
-		return lb.obj, errors.New(fmt.Sprintf(
+		return NullList, fmt.Errorf(
 			"could not build list due to invalid contact parameters %v",
 			invalidParams,
-		))
+		)
 	}
 	return lb.obj, nil
 }

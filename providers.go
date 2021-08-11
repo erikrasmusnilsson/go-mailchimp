@@ -15,6 +15,14 @@ const (
 	ResponseStatusFailedServer = 5 // for 500
 )
 
+type errorResponse struct {
+	Type     string `json:"type"`
+	Title    string `json:"title"`
+	Status   int    `json:"status"`
+	Detail   string `json:"detail"`
+	Instance string `json:"instance"`
+}
+
 type MailChimpProvider interface {
 	Post(uri string, body interface{}) ([]byte, error)
 	Get(uri string) ([]byte, error)
@@ -28,20 +36,11 @@ type mailChimpProvider struct {
 }
 
 func (mcp mailChimpProvider) Post(uri string, body interface{}) ([]byte, error) {
-	rawBody, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
 	httpClient := http.DefaultClient
-	req, err := http.NewRequest(
-		"POST",
-		mcp.url(uri),
-		bytes.NewBuffer(rawBody),
-	)
+	req, err := mcp.createBodyRequest("POST", uri, body)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", mcp.Authorization)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -53,30 +52,17 @@ func (mcp mailChimpProvider) Post(uri string, body interface{}) ([]byte, error) 
 		return nil, err
 	}
 	if status != ResponseStatusSuccess {
-		errResponse := errorResponse{}
-		err = json.Unmarshal(bytes, &errResponse)
-		return nil, errors.New(
-			fmt.Sprintf(
-				"request was not successful '%s', status: %d",
-				errResponse.Detail,
-				errResponse.Status,
-			),
-		)
+		return nil, mcp.handleFailedRequest(bytes)
 	}
 	return bytes, nil
 }
 
 func (mcp mailChimpProvider) Get(uri string) ([]byte, error) {
 	httpClient := http.DefaultClient
-	req, err := http.NewRequest(
-		"GET",
-		mcp.url(uri),
-		nil,
-	)
+	req, err := mcp.createBodylessRequest("GET", uri)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", mcp.Authorization)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -88,34 +74,17 @@ func (mcp mailChimpProvider) Get(uri string) ([]byte, error) {
 		return nil, err
 	}
 	if status != ResponseStatusSuccess {
-		errResponse := errorResponse{}
-		err = json.Unmarshal(bytes, &errResponse)
-		return nil, errors.New(
-			fmt.Sprintf(
-				"request was not successful '%s', status: %d",
-				errResponse.Detail,
-				errResponse.Status,
-			),
-		)
+		return nil, mcp.handleFailedRequest(bytes)
 	}
 	return bytes, nil
 }
 
 func (mcp mailChimpProvider) Patch(uri string, body interface{}) ([]byte, error) {
-	rawBody, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
 	httpClient := http.DefaultClient
-	req, err := http.NewRequest(
-		"PATCH",
-		mcp.url(uri),
-		bytes.NewBuffer(rawBody),
-	)
+	req, err := mcp.createBodyRequest("PATCH", uri, body)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", mcp.Authorization)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -127,30 +96,17 @@ func (mcp mailChimpProvider) Patch(uri string, body interface{}) ([]byte, error)
 		return nil, err
 	}
 	if status != ResponseStatusSuccess {
-		errResponse := errorResponse{}
-		err = json.Unmarshal(bytes, &errResponse)
-		return nil, errors.New(
-			fmt.Sprintf(
-				"request was not successful '%s', status: %d",
-				errResponse.Detail,
-				errResponse.Status,
-			),
-		)
+		return nil, mcp.handleFailedRequest(bytes)
 	}
 	return bytes, nil
 }
 
 func (mcp mailChimpProvider) Delete(uri string) ([]byte, error) {
 	httpClient := http.DefaultClient
-	req, err := http.NewRequest(
-		"DELETE",
-		mcp.url(uri),
-		nil,
-	)
+	req, err := mcp.createBodylessRequest("DELETE", uri)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", mcp.Authorization)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -162,17 +118,56 @@ func (mcp mailChimpProvider) Delete(uri string) ([]byte, error) {
 		return nil, err
 	}
 	if status != ResponseStatusSuccess {
-		errResponse := errorResponse{}
-		err = json.Unmarshal(bytes, &errResponse)
-		return nil, errors.New(
-			fmt.Sprintf(
-				"request was not successful '%s', status: %d",
-				errResponse.Detail,
-				errResponse.Status,
-			),
-		)
+		return nil, mcp.handleFailedRequest(bytes)
 	}
 	return bytes, nil
+}
+
+func (mcp mailChimpProvider) createBodylessRequest(method, uri string) (*http.Request, error) {
+	req, err := http.NewRequest(
+		method,
+		mcp.url(uri),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", mcp.Authorization)
+	return req, nil
+}
+
+func (mcp mailChimpProvider) createBodyRequest(method, uri string, body interface{}) (*http.Request, error) {
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(
+		method,
+		mcp.url(uri),
+		bytes.NewBuffer(raw),
+	)
+	fmt.Println(string(raw))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", mcp.Authorization)
+	return req, nil
+}
+
+func (mcp mailChimpProvider) handleFailedRequest(body []byte) error {
+	fmt.Println(string(body))
+	errResponse := errorResponse{}
+	err := json.Unmarshal(body, &errResponse)
+	if err != nil {
+		return errors.New(
+			"request was not successful, and could not unmarshal error response",
+		)
+	}
+	return fmt.Errorf(
+		"request was not successful: %s Status %d",
+		errResponse.Detail,
+		errResponse.Status,
+	)
 }
 
 func (mcp mailChimpProvider) url(uri string) string {

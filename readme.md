@@ -190,6 +190,79 @@ if err := chimp.UpdateMemberTags("list-id", "member@email.com", tags); err != ni
 
 There is also another version of `UpdateMemberTags` called `UpdateMemberTagsSync`. Using `UpdateMemberTagsSync` will make sure that any automations at MailChimp based on tags are **not** ran during the update. Please note that this also means that using `UpdateMemberTags` to update the tags will cause these automations to run, if any are set up. Please note that both of these receiver functions will only return an error if one occured on the MailChimp API side.
 
+## Webhooks
+It is possible to add Webhooks unto your MailChimp audience using the `mailchimp.WebhookClient`. To create a new client, simply call `mailchimp.NewWebhookClient` with the same parameters as for `mailchimp.NewClient`, that is, the API key and region for your MailChimp account. An example is given below.
+```go
+webhookChimp := mailchimp.NewWebhookClient("key", "region")
+```
+
+After creating a client you can do add, fetch and delete Webhooks on your MailChimp audience. Each of these operations are described with examples below. 
+
+### Add Webhook
+To add a Webhook you must know the URL to which events should be sent and the list ID of the audience you want to listen to. You can specify the types of events that should be sent to the Webhook using `mailchimp.WebhookEvents`, as well as the preferred event sources using `mailchimp.WebhookSources`. A quick example of adding a Webhook is shown below. The `mailchimp.Webhook` that is returned from `AddWebhook` contains the Webhook ID together with other information regarding the newly created Webhook.
+
+**Note:** Even though MailChimp uses HTTP POST requests to forward events to the Webhook, an initial HTTP GET request will be made to it at the point of creating the Webhook. Make sure to have a handler for a GET request that returns `200 OK` as well as a POST handler for your Webhook.
+
+```go
+webhookChimp := mailchimp.NewWebhookClient("key", "region")
+options := mailchimp.AddWebhookParams{
+	URL: "https://your-webhook.com",
+	ListID: "list-id",
+	Events: mailchimp.WebhookEvents{
+		Subscribe: true,
+		Unsubscribe: true,
+	},
+	Sources: mailchimp.WebhookSources{
+		User: true,
+		Admin: true,
+	},
+}
+webhook, err := webhookChimp.AddWebhook(options)
+if err != nil {
+    handleErr(err)
+}
+```
+
+The full set of options for events and sources are shown below. 
+
+```go
+type WebhookEvents struct {
+	Subscribe   bool
+	Unsubscribe bool
+	Profile     bool
+	Cleaned     bool
+	UpEmail     bool
+	Campaign    bool
+}
+
+type WebhookSources struct {
+	User  bool
+	Admin bool
+	API   bool
+}
+```
+
+### Fetch a Webhook by ID 
+It is rather straight forward to fetch a Webhook by its ID. Simply call `GetWebhook` with the list ID and Webhook ID as parameters as shown below.
+
+```go
+webhookChimp := mailchimp.NewWebhookClient("key", "region")
+webhook, err := webhookChimp.GetWebhook("list-id", "webhook-id")
+if err != nil {
+    handleErr(err)
+}
+```
+
+### Delete a Webhook
+To delete a Webhook, all that is required is the list ID as well as the Webhook ID. Simply call `DeleteWebhook` and check for an error to complete the operation. An example is shown below. 
+
+```go
+webhookChimp := mailchimp.NewWebhookClient("key", "region")
+if err := webhookChimp.DeleteWebhook("list-id", "webhook-id"); err != nil {
+    handleErr(err)
+}
+```
+
 ## Testing
 ### Mocking the MailChimp provider
 While running automated tests, it is very likely that you do not want `go-mailchimp` to send real requests to the MailChimp Marketing API. To avoid this, one can use the `mailchimp.NewCustomDependencyClient` to instantiate a client in place of the `mailchimp.NewClient` function. This function requires a value of the type `mailchimp.MailChimpProviderMock` to be sent in as a parameter. Using this mock, you can define the behaviour of the MailChimp endpoints for `GET`, `PATCH`, `POST` and `DELETE` calls. Thus, if you need to test how your software behaves when an error is returned from `go-mailchimp` you can simply define a function that returns an arbitrary error. By inspecting for example the `PostCalls` field on the `mailchimp.MailChimpProviderMock` you can also see how many `POST` requests were made during the test. 

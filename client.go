@@ -25,20 +25,11 @@ type Client interface {
 }
 
 type client struct {
-	key      string
 	provider MailChimpProvider
 }
 
 type pingResponse struct {
 	HealthStatus string `json:"health_status"`
-}
-
-type errorResponse struct {
-	Type     string `json:"type"`
-	Title    string `json:"title"`
-	Status   int    `json:"status"`
-	Detail   string `json:"detail"`
-	Instance string `json:"instance"`
 }
 
 func NewClient(key, region string) Client {
@@ -72,37 +63,37 @@ func (c client) Ping() error {
 }
 
 func (c client) CreateList(l List) (List, error) {
-	list := List{}
 	body, err := c.provider.Post("/lists", l)
 	if err != nil {
-		return List{}, err
+		return NullList, err
 	}
+	list := List{}
 	if err := json.Unmarshal(body, &list); err != nil {
-		return List{}, err
+		return NullList, err
 	}
 	return list, nil
 }
 
 func (c client) FetchLists() ([]List, error) {
-	lists := listCollection{}
 	body, err := c.provider.Get("/lists")
 	if err != nil {
-		return lists.Lists, err
+		return NullListSlice, err
 	}
+	lists := listCollection{}
 	if err := json.Unmarshal(body, &lists); err != nil {
-		return lists.Lists, err
+		return NullListSlice, err
 	}
 	return lists.Lists, nil
 }
 
 func (c client) FetchList(id string) (List, error) {
-	list := List{}
 	body, err := c.provider.Get(fmt.Sprintf("/lists/%s", id))
 	if err != nil {
-		return List{}, err
+		return NullList, err
 	}
+	list := List{}
 	if err := json.Unmarshal(body, &list); err != nil {
-		return List{}, err
+		return NullList, err
 	}
 	return list, nil
 }
@@ -113,11 +104,11 @@ func (c client) UpdateList(id string, l List) (List, error) {
 		l,
 	)
 	if err != nil {
-		return List{}, err
+		return NullList, err
 	}
-	var list List
+	list := List{}
 	if err := json.Unmarshal(body, &list); err != nil {
-		return list, err
+		return NullList, err
 	}
 	return list, nil
 }

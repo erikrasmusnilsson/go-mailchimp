@@ -1,7 +1,6 @@
 package mailchimp
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -11,6 +10,8 @@ const (
 	StatusPending      = "pending"
 	StatusCleaned      = "cleaned"
 )
+
+var NullMember = Member{}
 
 type Member struct {
 	EmailAddress string            `json:"email_address" mc_validator:"required"`
@@ -27,10 +28,10 @@ func (sb MemberBuilder) Build() (Member, error) {
 	if invalidParams, valid := validate(sb.obj); valid {
 		return sb.obj, nil
 	} else {
-		return sb.obj, errors.New(fmt.Sprintf(
+		return NullMember, fmt.Errorf(
 			"could not build member due to invalid parameters %v",
 			invalidParams,
-		))
+		)
 	}
 }
 

@@ -110,3 +110,27 @@ func (client *ClientMock) UpdateMemberTagsSync(id, memberEmail string, tags []Ta
 	client.UpdateMemberTagsSyncCalls++
 	return client.UpdateMemberTagsSyncMock(id, memberEmail, tags)
 }
+
+type WebhookClientMock struct {
+	AddMock     func(params AddWebhookParams) (Webhook, error)
+	AddCalls    int
+	GetMock     func(listID string, webookID string) (Webhook, error)
+	GetCalls    int
+	DeleteMock  func(listID string, webhookID string) error
+	DeleteCalls int
+}
+
+func (mock *WebhookClientMock) Add(params AddWebhookParams) (Webhook, error) {
+	mock.AddCalls++
+	return mock.AddMock(params)
+}
+
+func (mock *WebhookClientMock) Get(listID, webhookID string) (Webhook, error) {
+	mock.GetCalls++
+	return mock.GetMock(listID, webhookID)
+}
+
+func (mock *WebhookClientMock) Delete(listID, webhookID string) error {
+	mock.DeleteCalls++
+	return mock.DeleteMock(listID, webhookID)
+}
