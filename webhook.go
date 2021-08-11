@@ -1,6 +1,9 @@
 package mailchimp
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 var NullWebhook = Webhook{}
 
@@ -45,4 +48,48 @@ func (builder WebhookBuilder) Sources(sources WebhookSources) WebhookBuilder {
 func (builder WebhookBuilder) ListID(listID string) WebhookBuilder {
 	builder.obj.ListID = listID
 	return builder
+}
+
+type SubscribeEvent struct {
+	Type    string             `json:"type"`
+	FiredAt time.Time          `json:"fired_at"`
+	Data    SubscribeEventData `json:"data"`
+}
+
+type SubscribeEventData struct {
+	ID          string            `json:"id"`
+	ListID      string            `json:"list_id"`
+	Email       string            `json:"email"`
+	EmailType   string            `json:"email_type"`
+	MergeFields map[string]string `json:"merges"`
+}
+
+type UnsubscribeEvent struct {
+	Type    string    `json:"type"`
+	FiredAt time.Time `json:"fired_at"`
+}
+
+type UnsubscribeEventData struct {
+	Action      string            `json:"action"`
+	Reason      string            `json:"reason"`
+	ID          string            `json:"id"`
+	ListID      string            `json:"list_id"`
+	Email       string            `json:"email"`
+	EmailType   string            `json:"email_type"`
+	MergeFields map[string]string `json:"merges"`
+}
+
+type WebhookEvents struct {
+	Subscribe   bool `json:"subscribe"`
+	Unsubscribe bool `json:"unsubscribe"`
+	Profile     bool `json:"profile"`
+	Cleaned     bool `json:"cleaned"`
+	UpEmail     bool `json:"upemail"`
+	Campaign    bool `json:"campaign"`
+}
+
+type WebhookSources struct {
+	User  bool `json:"user"`
+	Admin bool `json:"admin"`
+	API   bool `json:"api"`
 }

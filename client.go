@@ -12,16 +12,23 @@ import (
 
 type Client interface {
 	Ping() error
+
 	CreateList(List) (List, error)
 	FetchLists() ([]List, error)
 	FetchList(string) (List, error)
 	UpdateList(string, List) (List, error)
 	DeleteList(string) error
+
 	Batch(string, []Member) error
 	BatchWithUpdate(id string, members []Member) error
+
 	FetchMemberTags(listID, memberEmail string) ([]Tag, error)
 	UpdateMemberTags(listID, memberEmail string, tags []Tag) error
 	UpdateMemberTagsSync(listID, memberEmail string, tags []Tag) error
+
+	CreateWebhook(webhook Webhook) (Webhook, error)
+	FetchWebhook(listID string, webookID string) (Webhook, error)
+	DeleteWebhook(listID string, webhookID string) error
 }
 
 type client struct {
@@ -214,6 +221,60 @@ func (c client) UpdateMemberTagsSync(listID, memberEmail string, tags []Tag) err
 			Tags:      tags,
 			IsSyncing: true,
 		},
+	)
+	return err
+}
+
+type CreateWebhookRequestPayload struct {
+	URL     string         `json:"url"`
+	Events  WebhookEvents  `json:"events"`
+	Sources WebhookSources `json:"sources"`
+}
+
+func (c client) CreateWebhook(webhook Webhook) (Webhook, error) {
+	body, err := c.provider.Post(
+		fmt.Sprintf("/lists/%s/webhooks", webhook.ListID),
+		CreateWebhookRequestPayload{
+			URL:     webhook.URL,
+			Events:  webhook.Events,
+			Sources: webhook.Sources,
+		},
+	)
+	if err != nil {
+		return NullWebhook, err
+	}
+	createdWebhook := Webhook{}
+	if err := json.Unmarshal(body, &createdWebhook); err != nil {
+		return NullWebhook, err
+	}
+	return createdWebhook, nil
+}
+
+func (c client) FetchWebhook(listID, webhookID string) (Webhook, error) {
+	body, err := c.provider.Get(
+		fmt.Sprintf(
+			"/lists/%s/webhooks/%s",
+			listID,
+			webhookID,
+		),
+	)
+	if err != nil {
+		return NullWebhook, err
+	}
+	webhook := Webhook{}
+	if err := json.Unmarshal(body, &webhook); err != nil {
+		return NullWebhook, err
+	}
+	return webhook, nil
+}
+
+func (c client) DeleteWebhook(listID, webhookID string) error {
+	_, err := c.provider.Delete(
+		fmt.Sprintf(
+			"/lists/%s/webhooks/%s",
+			listID,
+			webhookID,
+		),
 	)
 	return err
 }

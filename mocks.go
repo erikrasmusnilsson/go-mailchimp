@@ -32,28 +32,38 @@ func (mcpm *MailChimpProviderMock) Delete(uri string) ([]byte, error) {
 }
 
 type ClientMock struct {
-	PingMock                  func() error
-	PingCalls                 int
-	CreateListMock            func(List) (List, error)
-	CreateListCalls           int
-	FetchListsMock            func() ([]List, error)
-	FetchListsCalls           int
-	FetchListMock             func(string) (List, error)
-	FetchListCalls            int
-	UpdateListMock            func(string, List) (List, error)
-	UpdateListCalls           int
-	DeleteListMock            func(string) error
-	DeleteListCalls           int
-	BatchMock                 func(string, []Member) error
-	BatchCalls                int
-	BatchWithUpdateMock       func(string, []Member) error
-	BatchWithUpdateCalls      int
+	PingMock  func() error
+	PingCalls int
+
+	CreateListMock  func(List) (List, error)
+	CreateListCalls int
+	FetchListsMock  func() ([]List, error)
+	FetchListsCalls int
+	FetchListMock   func(string) (List, error)
+	FetchListCalls  int
+	UpdateListMock  func(string, List) (List, error)
+	UpdateListCalls int
+	DeleteListMock  func(string) error
+	DeleteListCalls int
+
+	BatchMock            func(string, []Member) error
+	BatchCalls           int
+	BatchWithUpdateMock  func(string, []Member) error
+	BatchWithUpdateCalls int
+
 	FetchMemberTagsMock       func(string, string) ([]Tag, error)
 	FetchMemberTagsCalls      int
 	UpdateMemberTagsMock      func(string, string, []Tag) error
 	UpdateMemberTagsCalls     int
 	UpdateMemberTagsSyncMock  func(string, string, []Tag) error
 	UpdateMemberTagsSyncCalls int
+
+	CreateWebhookMock  func(webhook Webhook) (Webhook, error)
+	CreateWebhookCalls int
+	FetchWebhookMock   func(listID string, webhookID string) (Webhook, error)
+	FetchWebhookCalls  int
+	DeleteWebhookMock  func(listID string, webhookID string) error
+	DeleteWebhookCalls int
 }
 
 func (client *ClientMock) Ping() error {
@@ -111,26 +121,17 @@ func (client *ClientMock) UpdateMemberTagsSync(id, memberEmail string, tags []Ta
 	return client.UpdateMemberTagsSyncMock(id, memberEmail, tags)
 }
 
-type WebhookClientMock struct {
-	AddMock     func(params AddWebhookParams) (Webhook, error)
-	AddCalls    int
-	GetMock     func(listID string, webookID string) (Webhook, error)
-	GetCalls    int
-	DeleteMock  func(listID string, webhookID string) error
-	DeleteCalls int
+func (mock *ClientMock) CreaterWebhook(webhook Webhook) (Webhook, error) {
+	mock.CreateWebhookCalls++
+	return mock.CreateWebhookMock(webhook)
 }
 
-func (mock *WebhookClientMock) Add(params AddWebhookParams) (Webhook, error) {
-	mock.AddCalls++
-	return mock.AddMock(params)
+func (mock *ClientMock) FetchWebhook(listID, webhookID string) (Webhook, error) {
+	mock.FetchWebhookCalls++
+	return mock.FetchWebhookMock(listID, webhookID)
 }
 
-func (mock *WebhookClientMock) Get(listID, webhookID string) (Webhook, error) {
-	mock.GetCalls++
-	return mock.GetMock(listID, webhookID)
-}
-
-func (mock *WebhookClientMock) Delete(listID, webhookID string) error {
-	mock.DeleteCalls++
-	return mock.DeleteMock(listID, webhookID)
+func (mock *ClientMock) DeleteWebhook(listID, webhookID string) error {
+	mock.DeleteWebhookCalls++
+	return mock.DeleteWebhookMock(listID, webhookID)
 }

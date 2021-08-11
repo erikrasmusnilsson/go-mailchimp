@@ -191,35 +191,32 @@ if err := chimp.UpdateMemberTags("list-id", "member@email.com", tags); err != ni
 There is also another version of `UpdateMemberTags` called `UpdateMemberTagsSync`. Using `UpdateMemberTagsSync` will make sure that any automations at MailChimp based on tags are **not** ran during the update. Please note that this also means that using `UpdateMemberTags` to update the tags will cause these automations to run, if any are set up. Please note that both of these receiver functions will only return an error if one occured on the MailChimp API side.
 
 ## Webhooks
-It is possible to add Webhooks unto your MailChimp audience using the `mailchimp.WebhookClient`. To create a new client, simply call `mailchimp.NewWebhookClient` with the same parameters as for `mailchimp.NewClient`, that is, the API key and region for your MailChimp account. An example is given below.
-```go
-webhookChimp := mailchimp.NewWebhookClient("key", "region")
-```
+It is possible to add Webhooks unto your MailChimp audience using the `mailchimp.Client`. To create a new client, simply call `mailchimp.NewClient` with the API key and region for your MailChimp account. After creating a client you can do add, fetch and delete Webhooks on your MailChimp audience. Each of these operations are described with examples below. 
 
-After creating a client you can do add, fetch and delete Webhooks on your MailChimp audience. Each of these operations are described with examples below. 
-
-### Add Webhook
-To add a Webhook you must know the URL to which events should be sent and the list ID of the audience you want to listen to. You can specify the types of events that should be sent to the Webhook using `mailchimp.WebhookEvents`, as well as the preferred event sources using `mailchimp.WebhookSources`. A quick example of adding a Webhook is shown below. The `mailchimp.Webhook` that is returned from `AddWebhook` contains the Webhook ID together with other information regarding the newly created Webhook.
+### Create Webhook
+To add a Webhook you must know the URL to which events should be sent and the list ID of the audience you want to listen to. You can specify the types of events that should be sent to the Webhook using `mailchimp.WebhookEvents`, as well as the preferred event sources using `mailchimp.WebhookSources`. It is recommended to use `mailchimp.WebhookBuilder{}` when creating your Webhook as it will perform some basic validation on the data before it is sent off to MailChimp. A simple example of creating a Webhook is shown below. As can be seen, the `mailchimp.Webhook` only needs to be sent as a parameter to `chimp.CreateWebhook` in order to finalize the operation.
 
 **Note:** Even though MailChimp uses HTTP POST requests to forward events to the Webhook, an initial HTTP GET request will be made to it at the point of creating the Webhook. Make sure to have a handler for a GET request that returns `200 OK` as well as a POST handler for your Webhook.
 
 ```go
-webhookChimp := mailchimp.NewWebhookClient("key", "region")
-options := mailchimp.AddWebhookParams{
-	URL: "https://your-webhook.com",
-	ListID: "list-id",
-	Events: mailchimp.WebhookEvents{
+wh, err := mailchimp.WebhookBuilder{}.
+	URL("http://your-url.com/webhook").
+	ListID("list-id").
+	Events(mailchimp.WebhookEvents{
 		Subscribe: true,
-		Unsubscribe: true,
-	},
-	Sources: mailchimp.WebhookSources{
-		User: true,
+	}).
+	Sources(mailchimp.WebhookSources{
 		Admin: true,
-	},
-}
-webhook, err := webhookChimp.AddWebhook(options)
+	}).
+	Build()
 if err != nil {
-    handleErr(err)
+	handleErr(err)
+}
+
+chimp := mailchimp.NewClient("list-id", "region")
+wh, err = chimp.CreateWebhook(wh)
+if err != nil {
+	handleErr(err)
 }
 ```
 
@@ -243,11 +240,11 @@ type WebhookSources struct {
 ```
 
 ### Fetch a Webhook by ID 
-It is rather straight forward to fetch a Webhook by its ID. Simply call `GetWebhook` with the list ID and Webhook ID as parameters as shown below.
+It is rather straight forward to fetch a Webhook by its ID. Simply call `FetchWebhook` with the list ID and Webhook ID as parameters as shown below.
 
 ```go
-webhookChimp := mailchimp.NewWebhookClient("key", "region")
-webhook, err := webhookChimp.GetWebhook("list-id", "webhook-id")
+chimp := mailchimp.NewClient("key", "region")
+webhook, err := chimp.FetchWebhook("list-id", "webhook-id")
 if err != nil {
     handleErr(err)
 }
@@ -257,8 +254,8 @@ if err != nil {
 To delete a Webhook, all that is required is the list ID as well as the Webhook ID. Simply call `DeleteWebhook` and check for an error to complete the operation. An example is shown below. 
 
 ```go
-webhookChimp := mailchimp.NewWebhookClient("key", "region")
-if err := webhookChimp.DeleteWebhook("list-id", "webhook-id"); err != nil {
+chimp := mailchimp.NewClient("key", "region")
+if err := chimp.DeleteWebhook("list-id", "webhook-id"); err != nil {
     handleErr(err)
 }
 ```
@@ -320,27 +317,37 @@ The `mailchimp.ClientMock` struct is shown below.
 
 ```go
 type ClientMock struct {
-	PingMock                  func() error
-	PingCalls                 int
-	CreateListMock            func(List) (List, error)
-	CreateListCalls           int
-	FetchListsMock            func() ([]List, error)
-	FetchListsCalls           int
-	FetchListMock             func(string) (List, error)
-	FetchListCalls            int
-	UpdateListMock            func(string, List) (List, error)
-	UpdateListCalls           int
-	DeleteListMock            func(string) error
-	DeleteListCalls           int
-	BatchMock                 func(string, []Member) error
-	BatchCalls                int
-	BatchWithUpdateMock       func(string, []Member) error
-	BatchWithUpdateCalls      int
+	PingMock  func() error
+	PingCalls int
+
+	CreateListMock  func(List) (List, error)
+	CreateListCalls int
+	FetchListsMock  func() ([]List, error)
+	FetchListsCalls int
+	FetchListMock   func(string) (List, error)
+	FetchListCalls  int
+	UpdateListMock  func(string, List) (List, error)
+	UpdateListCalls int
+	DeleteListMock  func(string) error
+	DeleteListCalls int
+
+	BatchMock            func(string, []Member) error
+	BatchCalls           int
+	BatchWithUpdateMock  func(string, []Member) error
+	BatchWithUpdateCalls int
+
 	FetchMemberTagsMock       func(string, string) ([]Tag, error)
 	FetchMemberTagsCalls      int
 	UpdateMemberTagsMock      func(string, string, []Tag) error
 	UpdateMemberTagsCalls     int
 	UpdateMemberTagsSyncMock  func(string, string, []Tag) error
 	UpdateMemberTagsSyncCalls int
+
+	CreateWebhookMock  func(webhook Webhook) (Webhook, error)
+	CreateWebhookCalls int
+	FetchWebhookMock   func(listID string, webhookID string) (Webhook, error)
+	FetchWebhookCalls  int
+	DeleteWebhookMock  func(listID string, webhookID string) error
+	DeleteWebhookCalls int
 }
 ```

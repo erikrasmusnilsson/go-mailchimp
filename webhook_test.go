@@ -71,3 +71,23 @@ func TestWebhookBuilder_Build(t *testing.T) {
 		t.Error("unexpected error returned from Build with Email and ListID defined")
 	}
 }
+
+func equalEvents(a, b WebhookEvents) bool {
+	return a.Campaign == b.Campaign &&
+		a.Cleaned == b.Cleaned &&
+		a.Profile == b.Profile &&
+		a.Subscribe == b.Subscribe &&
+		a.Unsubscribe == b.Unsubscribe &&
+		a.UpEmail == b.UpEmail
+}
+
+func equalSources(a, b WebhookSources) bool {
+	return a.API == b.API && a.Admin == b.Admin && a.User == b.User
+}
+
+func equalWebhooks(a, b Webhook) bool {
+	return a.ListID == b.ListID &&
+		a.URL == b.URL &&
+		equalEvents(a.Events, b.Events) &&
+		equalSources(a.Sources, b.Sources)
+}
