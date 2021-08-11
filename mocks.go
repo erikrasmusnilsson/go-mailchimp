@@ -121,7 +121,7 @@ func (client *ClientMock) UpdateMemberTagsSync(id, memberEmail string, tags []Ta
 	return client.UpdateMemberTagsSyncMock(id, memberEmail, tags)
 }
 
-func (mock *ClientMock) CreaterWebhook(webhook Webhook) (Webhook, error) {
+func (mock *ClientMock) CreateWebhook(webhook Webhook) (Webhook, error) {
 	mock.CreateWebhookCalls++
 	return mock.CreateWebhookMock(webhook)
 }
