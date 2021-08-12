@@ -80,8 +80,9 @@ type SubscribeEventData struct {
 }
 
 type UnsubscribeEvent struct {
-	Type    string    `json:"type"`
-	FiredAt time.Time `json:"fired_at"`
+	Type    string               `json:"type"`
+	FiredAt time.Time            `json:"fired_at"`
+	Data    UnsubscribeEventData `json:"data"`
 }
 
 type UnsubscribeEventData struct {
