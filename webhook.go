@@ -55,6 +55,11 @@ func (builder WebhookBuilder) ListID(listID string) WebhookBuilder {
 	return builder
 }
 
+type EventHeader struct {
+	Type    string    `json:"type"`
+	FiredAt time.Time `json:"fired_at"`
+}
+
 type SubscribeEvent struct {
 	Type    string             `json:"type"`
 	FiredAt time.Time          `json:"fired_at"`
