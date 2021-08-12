@@ -7,6 +7,11 @@ import (
 
 var NullWebhook = Webhook{}
 
+const (
+	SubscribeEventType   = "subscribe"
+	UnsubscribeEventType = "unsubscribe"
+)
+
 type Webhook struct {
 	ID      string         `json:"id"`
 	URL     string         `json:"url" mc_validator:"required"`
