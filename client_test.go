@@ -596,3 +596,161 @@ func TestClient_UpdateMemberTagsSyncCallsProviderWithCorrectParams(t *testing.T)
 	client := NewCustomDependencyClient(&mock)
 	client.UpdateMemberTagsSync("list-id", "test@test.com", []Tag{tag})
 }
+
+func TestClient_CreateWebhookCallsProviderWithCorrectParams(t *testing.T) {
+	expectedListID := "list-id"
+	webhook := Webhook{
+		URL:    "http://test.com",
+		ListID: expectedListID,
+	}
+	mock := MailChimpProviderMock{
+		PostMock: func(s string, i interface{}) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s/webhooks", expectedListID) {
+				t.Errorf(
+					"expected uri to be /lists/%s/webhooks, but was %s",
+					expectedListID,
+					s,
+				)
+			}
+			payload := i.(CreateWebhookRequestPayload)
+			if payload.URL != webhook.URL {
+				t.Errorf(
+					"expected Webhook URL to be %s but was %s",
+					webhook.URL,
+					payload.URL,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	client.CreateWebhook(webhook)
+}
+
+func TestClient_CreateWebhookReturnsErrorIfProviderFails(t *testing.T) {
+	expectedListID := "list-id"
+	webhook := Webhook{
+		URL:    "http://test.com",
+		ListID: expectedListID,
+	}
+	mock := MailChimpProviderMock{
+		PostMock: func(s string, i interface{}) ([]byte, error) {
+			return nil, errors.New("mocked error")
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	_, err := client.CreateWebhook(webhook)
+	if err == nil {
+		t.Error("expected error to be returned but none was")
+	}
+}
+
+func TestClient_FetchWebhooksCallsProviderWithCorrectParams(t *testing.T) {
+	expectedListID := "list-id"
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s/webhooks", expectedListID) {
+				t.Errorf(
+					"expected uri to be /lists/%s/webhooks, but was %s",
+					expectedListID,
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	client.FetchWebhooks(expectedListID)
+}
+
+func TestClient_FetchWebhooksReturnsErrorIfProviderFails(t *testing.T) {
+	expectedListID := "list-id"
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			return nil, errors.New("mocked error")
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	_, err := client.FetchWebhooks(expectedListID)
+	if err == nil {
+		t.Error("expected error to be returned but none was")
+	}
+}
+
+func TestClient_FetchWebhookCallsProviderWithCorrectParams(t *testing.T) {
+	expectedListID := "list-id"
+	expectedWebhookID := "webhook-id"
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			if s != fmt.Sprintf(
+				"/lists/%s/webhooks/%s",
+				expectedListID,
+				expectedWebhookID,
+			) {
+				t.Errorf(
+					"expected uri to be /lists/%s/webhooks/%s, but was %s",
+					expectedListID,
+					expectedWebhookID,
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	client.FetchWebhook(expectedListID, expectedWebhookID)
+}
+
+func TestClient_FetchWebhookReturnsErrorIfProviderFails(t *testing.T) {
+	expectedListID := "list-id"
+	expectedWebhookID := "webhook-id"
+	mock := MailChimpProviderMock{
+		GetMock: func(s string) ([]byte, error) {
+			return nil, errors.New("mocked error")
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	_, err := client.FetchWebhook(expectedListID, expectedWebhookID)
+	if err == nil {
+		t.Error("expected error to be returned but none was")
+	}
+}
+
+func TestClient_DeleteWebhookCallsProviderWithCorrectParams(t *testing.T) {
+	expectedListID := "list-id"
+	expectedWebhookID := "webhook-id"
+	mock := MailChimpProviderMock{
+		DeleteMock: func(s string) ([]byte, error) {
+			if s != fmt.Sprintf(
+				"/lists/%s/webhooks/%s",
+				expectedListID,
+				expectedWebhookID,
+			) {
+				t.Errorf(
+					"expected uri to be /lists/%s/webhooks/%s, but was %s",
+					expectedListID,
+					expectedWebhookID,
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	client.DeleteWebhook(expectedListID, expectedWebhookID)
+}
+
+func TestClient_DeleteWebhookReturnsErrorIfProviderFails(t *testing.T) {
+	expectedListID := "list-id"
+	expectedWebhookID := "webhook-id"
+	mock := MailChimpProviderMock{
+		DeleteMock: func(s string) ([]byte, error) {
+			return nil, errors.New("mocked error")
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	err := client.DeleteWebhook(expectedListID, expectedWebhookID)
+	if err == nil {
+		t.Error("expected error to be returned but none was")
+	}
+}

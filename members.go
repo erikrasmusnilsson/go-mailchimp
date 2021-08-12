@@ -20,6 +20,22 @@ type Member struct {
 	MergeFields  map[string]string `json:"merge_fields"`
 }
 
+func (m Member) Subscribed() bool {
+	return m.Status == StatusSubscribed
+}
+
+func (m Member) Unsubscribed() bool {
+	return m.Status == StatusUnsubscribed
+}
+
+func (m Member) Pending() bool {
+	return m.Status == StatusPending
+}
+
+func (m Member) Cleaned() bool {
+	return m.Status == StatusCleaned
+}
+
 type MemberBuilder struct {
 	obj Member
 }

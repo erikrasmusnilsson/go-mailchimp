@@ -27,6 +27,7 @@ type Client interface {
 	UpdateMemberTagsSync(listID, memberEmail string, tags []Tag) error
 
 	CreateWebhook(webhook Webhook) (Webhook, error)
+	FetchWebhooks(listID string) ([]Webhook, error)
 	FetchWebhook(listID string, webookID string) (Webhook, error)
 	DeleteWebhook(listID string, webhookID string) error
 }
@@ -248,6 +249,20 @@ func (c client) CreateWebhook(webhook Webhook) (Webhook, error) {
 		return NullWebhook, err
 	}
 	return createdWebhook, nil
+}
+
+func (c client) FetchWebhooks(listID string) ([]Webhook, error) {
+	body, err := c.provider.Get(
+		fmt.Sprintf("/lists/%s/webhooks", listID),
+	)
+	if err != nil {
+		return nil, err
+	}
+	collection := webhookCollection{}
+	if err := json.Unmarshal(body, &collection); err != nil {
+		return nil, err
+	}
+	return collection.Webhooks, nil
 }
 
 func (c client) FetchWebhook(listID, webhookID string) (Webhook, error) {

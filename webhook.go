@@ -15,6 +15,11 @@ type Webhook struct {
 	ListID  string         `json:"list_id" mc_validator:"required"`
 }
 
+type webhookCollection struct {
+	Webhooks   []Webhook `json:"webhooks"`
+	TotalItems int       `json:"total_items"`
+}
+
 type WebhookBuilder struct {
 	obj Webhook
 }

@@ -60,6 +60,8 @@ type ClientMock struct {
 
 	CreateWebhookMock  func(webhook Webhook) (Webhook, error)
 	CreateWebhookCalls int
+	FetchWebhooksMock  func(listID string) ([]Webhook, error)
+	FetchWebhooksCalls int
 	FetchWebhookMock   func(listID string, webhookID string) (Webhook, error)
 	FetchWebhookCalls  int
 	DeleteWebhookMock  func(listID string, webhookID string) error
@@ -124,6 +126,11 @@ func (client *ClientMock) UpdateMemberTagsSync(id, memberEmail string, tags []Ta
 func (mock *ClientMock) CreateWebhook(webhook Webhook) (Webhook, error) {
 	mock.CreateWebhookCalls++
 	return mock.CreateWebhookMock(webhook)
+}
+
+func (mock *ClientMock) FetchWebhooks(listID string) ([]Webhook, error) {
+	mock.FetchWebhooksCalls++
+	return mock.FetchWebhooksMock(listID)
 }
 
 func (mock *ClientMock) FetchWebhook(listID, webhookID string) (Webhook, error) {

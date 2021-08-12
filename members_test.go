@@ -86,3 +86,67 @@ func TestMemberBuilder_Build(t *testing.T) {
 		t.Error("unexpected error on build() for valid member")
 	}
 }
+
+func TestMember_StatusSubscribed(t *testing.T) {
+	member := Member{Status: "subscribed"}
+	if !member.Subscribed() {
+		t.Error("expected member.Subscribed to return true but returned false")
+	}
+	if member.Unsubscribed() {
+		t.Error("expected member.Unsubscribed to return false but returned true")
+	}
+	if member.Cleaned() {
+		t.Error("expected member.Cleaned to return false but returned true")
+	}
+	if member.Pending() {
+		t.Error("expected member.Pending to return false but returned true")
+	}
+}
+
+func TestMember_StatusUnsubscribed(t *testing.T) {
+	member := Member{Status: "unsubscribed"}
+	if member.Subscribed() {
+		t.Error("expected member.Subscribed to return false but returned true")
+	}
+	if !member.Unsubscribed() {
+		t.Error("expected member.Unsubscribed to return true but returned false")
+	}
+	if member.Cleaned() {
+		t.Error("expected member.Cleaned to return false but returned true")
+	}
+	if member.Pending() {
+		t.Error("expected member.Pending to return false but returned true")
+	}
+}
+
+func TestMember_StatusCleaned(t *testing.T) {
+	member := Member{Status: "cleaned"}
+	if member.Subscribed() {
+		t.Error("expected member.Subscribed to return false but returned true")
+	}
+	if member.Unsubscribed() {
+		t.Error("expected member.Unsubscribed to return false but returned true")
+	}
+	if !member.Cleaned() {
+		t.Error("expected member.Cleaned to return true but returned false")
+	}
+	if member.Pending() {
+		t.Error("expected member.Pending to return false but returned true")
+	}
+}
+
+func TestMember_StatusPending(t *testing.T) {
+	member := Member{Status: "pending"}
+	if member.Subscribed() {
+		t.Error("expected member.Subscribed to return false but returned true")
+	}
+	if member.Unsubscribed() {
+		t.Error("expected member.Unsubscribed to return false but returned true")
+	}
+	if member.Cleaned() {
+		t.Error("expected member.Cleaned to return false but returned true")
+	}
+	if !member.Pending() {
+		t.Error("expected member.Pending to return true but returned false")
+	}
+}
