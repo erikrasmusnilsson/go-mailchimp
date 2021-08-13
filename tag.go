@@ -1,7 +1,6 @@
 package mailchimp
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -23,10 +22,10 @@ func (tb TagBuilder) Build() (Tag, error) {
 	if invalidParams, valid := validate(tb.obj); valid {
 		return tb.obj, nil
 	} else {
-		return tb.obj, errors.New(fmt.Sprintf(
+		return tb.obj, fmt.Errorf(
 			"could not build tag due to invalid parameters %v",
 			invalidParams,
-		))
+		)
 	}
 }
 

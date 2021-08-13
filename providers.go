@@ -146,7 +146,6 @@ func (mcp mailChimpProvider) createBodyRequest(method, uri string, body interfac
 		mcp.url(uri),
 		bytes.NewBuffer(raw),
 	)
-	fmt.Println(string(raw))
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +154,6 @@ func (mcp mailChimpProvider) createBodyRequest(method, uri string, body interfac
 }
 
 func (mcp mailChimpProvider) handleFailedRequest(body []byte) error {
-	fmt.Println(string(body))
 	errResponse := errorResponse{}
 	err := json.Unmarshal(body, &errResponse)
 	if err != nil {
