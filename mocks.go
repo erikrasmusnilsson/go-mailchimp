@@ -60,8 +60,6 @@ type ClientMock struct {
 
 	ArchiveMemberMock  func(string, string) error
 	ArchiveMemberCalls int
-	DeleteMemberMock   func(string, string) error
-	DeleteMemberCalls  int
 
 	CreateWebhookMock  func(webhook Webhook) (Webhook, error)
 	CreateWebhookCalls int
@@ -131,11 +129,6 @@ func (client *ClientMock) UpdateMemberTagsSync(id, memberEmail string, tags []Ta
 func (client *ClientMock) ArchiveMember(id, memberEmail string) error {
 	client.ArchiveMemberCalls++
 	return client.ArchiveMemberMock(id, memberEmail)
-}
-
-func (client *ClientMock) DeleteMember(id, memberEmail string) error {
-	client.DeleteMemberCalls++
-	return client.DeleteMemberMock(id, memberEmail)
 }
 
 func (mock *ClientMock) CreateWebhook(webhook Webhook) (Webhook, error) {

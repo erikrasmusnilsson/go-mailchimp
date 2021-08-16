@@ -64,10 +64,6 @@ type Client interface {
 	// list ID and member email address. An error is returned if
 	// the request could not be completed.
 	ArchiveMember(listID, memberEmail string) error
-	// DeleteMember deletes a list member based on the given list
-	// ID and member email address. An error is returned if the
-	// request could not be completed.
-	DeleteMember(listID, memberEmail string) error
 
 	// CreateWebhook creates a new Webhook and returns an error
 	// if the request could not be completed.
@@ -284,17 +280,6 @@ func (c client) ArchiveMember(listID, memberEmail string) error {
 	_, err := c.provider.Delete(
 		fmt.Sprintf(
 			"/lists/%s/members/%s",
-			listID,
-			hashMd5(strings.ToLower(memberEmail)),
-		),
-	)
-	return err
-}
-
-func (c client) DeleteMember(listID, memberEmail string) error {
-	_, err := c.provider.Delete(
-		fmt.Sprintf(
-			"/lists/%s/members/%s/actions/delete-permanent",
 			listID,
 			hashMd5(strings.ToLower(memberEmail)),
 		),

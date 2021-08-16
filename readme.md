@@ -151,6 +151,18 @@ if err := chimp.BatchWithUpdate("list-id", members); err != nil {
 }
 ```
 
+## Archiving a member from a list
+First of all, make sure that you actually want to delete the member and not unsubscribe them.
+
+To archive a member, you need to know the list ID and member email address beforehand. The archiving is simple and straight forward as shown below. 
+
+```go
+chimp := mailchimp.NewClient("key", "region")
+if err := chimp.ArchiveMember("list-id", "test@test.com"); err != nil {
+	return handleErr(err)
+}
+```
+
 ## Fetching a members tags 
 It is possible to fetch all the tags associated with a given member for a given list. However, it is required that the lists ID and the members email address is known beforehand. To fetch the tags, simply use the `FetchMemberTags` receiver function on your `mailchimp.Client`. As example is given below. Please note that this function will only return an error is something went wrong on the MailChimp API side.
 
@@ -342,6 +354,9 @@ type ClientMock struct {
 	UpdateMemberTagsCalls     int
 	UpdateMemberTagsSyncMock  func(string, string, []Tag) error
 	UpdateMemberTagsSyncCalls int
+
+	ArchiveMemberMock  func(string, string) error
+	ArchiveMemberCalls int
 
 	CreateWebhookMock  func(webhook Webhook) (Webhook, error)
 	CreateWebhookCalls int
