@@ -597,6 +597,82 @@ func TestClient_UpdateMemberTagsSyncCallsProviderWithCorrectParams(t *testing.T)
 	client.UpdateMemberTagsSync("list-id", "test@test.com", []Tag{tag})
 }
 
+func TestClient_ArchiveMemberCallsDelete(t *testing.T) {
+	expectedListID := "list-id"
+	expectedMemberEmail := "test@test.com"
+	mock := MailChimpProviderMock{
+		DeleteMock: func(s string) ([]byte, error) {
+			return nil, nil
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	client.ArchiveMember(expectedListID, expectedMemberEmail)
+	if mock.DeleteCalls != 1 {
+		t.Errorf(
+			"expected Delete to have been called once but found %d",
+			mock.DeleteCalls,
+		)
+	}
+}
+
+func TestClient_ArchiveMemberCallsDeleteWithCorrectURI(t *testing.T) {
+	expectedListID := "list-id"
+	expectedMemberEmail := "test@test.com"
+	mock := MailChimpProviderMock{
+		DeleteMock: func(s string) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s/members/%s", expectedListID, hashMd5(expectedMemberEmail)) {
+				t.Errorf(
+					"expected uri to be /lists/%s/members/%s but was %s",
+					expectedListID,
+					hashMd5(expectedMemberEmail),
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	client.ArchiveMember(expectedListID, expectedMemberEmail)
+}
+
+func TestClient_DeleteMemberCallsDelete(t *testing.T) {
+	expectedListID := "list-id"
+	expectedMemberEmail := "test@test.com"
+	mock := MailChimpProviderMock{
+		DeleteMock: func(s string) ([]byte, error) {
+			return nil, nil
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	client.DeleteMember(expectedListID, expectedMemberEmail)
+	if mock.DeleteCalls != 1 {
+		t.Errorf(
+			"expected Delete to have been called once but found %d",
+			mock.DeleteCalls,
+		)
+	}
+}
+
+func TestClient_DeleteMemberCallsDeleteWithCorrectURI(t *testing.T) {
+	expectedListID := "list-id"
+	expectedMemberEmail := "test@test.com"
+	mock := MailChimpProviderMock{
+		DeleteMock: func(s string) ([]byte, error) {
+			if s != fmt.Sprintf("/lists/%s/members/%s/actions/delete-permanent", expectedListID, hashMd5(expectedMemberEmail)) {
+				t.Errorf(
+					"expected uri to be /lists/%s/members/%s but was %s",
+					expectedListID,
+					hashMd5(expectedMemberEmail),
+					s,
+				)
+			}
+			return nil, nil
+		},
+	}
+	client := NewCustomDependencyClient(&mock)
+	client.DeleteMember(expectedListID, expectedMemberEmail)
+}
+
 func TestClient_CreateWebhookCallsProviderWithCorrectParams(t *testing.T) {
 	expectedListID := "list-id"
 	webhook := Webhook{

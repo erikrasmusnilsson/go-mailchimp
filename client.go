@@ -11,24 +11,78 @@ import (
 )
 
 type Client interface {
+	// Ping sends a ping request to the MailChimp Marketing API
+	// and returns an error if there is something wrong with the
+	// connection.
 	Ping() error
 
+	// CreateList creates a new list in MailChimp and returns the
+	// list with some updated fields such as ID.
 	CreateList(List) (List, error)
+	// FetchLists fetches all the available lists for the MailChimp
+	// account. An error is returned if the request could not be
+	// completed.
 	FetchLists() ([]List, error)
-	FetchList(string) (List, error)
-	UpdateList(string, List) (List, error)
-	DeleteList(string) error
+	// FetchList returns all the information regarding a particular
+	// list based on its ID. An error is returned if the request
+	// could not be completed.
+	FetchList(listID string) (List, error)
+	// UpdateList updates the fields of a given list to the ones
+	// passed in as a parameter. An error is returned if the request
+	// could not be completed.
+	UpdateList(listID string, list List) (List, error)
+	// DeleteList removes a list of the given ID from the MailChimp
+	// account. An error is returned if the request
+	// could not be completed.
+	DeleteList(listID string) error
 
-	Batch(string, []Member) error
-	BatchWithUpdate(id string, members []Member) error
+	// Batch adds up to 500 members at once to the list of a given
+	// ID. An error is returned if the request could not be
+	// completed.
+	Batch(listID string, members []Member) error
+	// Batch adds or updates up to 500 members at once to the list
+	// of a given ID. An error is returned if the request
+	// could not be completed.
+	BatchWithUpdate(listID string, members []Member) error
 
+	// FetchMemberTags returns all the member tags for a given
+	// member based on the list ID and member email address. An
+	// error is returned if the request could not be completed.
 	FetchMemberTags(listID, memberEmail string) ([]Tag, error)
+	// UpdateMemberTags updates a members tags for the given list
+	// ID and member email address. Automations that have been set
+	// up for the tags will be triggered when using this method.
+	// An error is returned if the request could not be completed.
 	UpdateMemberTags(listID, memberEmail string, tags []Tag) error
+	// UpdateMemberTags updates a members tags for the given list
+	// ID and member email address. Automations that have been set
+	// up for the tags will NOT be triggered when using this method.
+	// An error is returned if the request could not be completed.
 	UpdateMemberTagsSync(listID, memberEmail string, tags []Tag) error
 
+	// ArchiveMember archives a list member based on the given
+	// list ID and member email address. An error is returned if
+	// the request could not be completed.
+	ArchiveMember(listID, memberEmail string) error
+	// DeleteMember deletes a list member based on the given list
+	// ID and member email address. An error is returned if the
+	// request could not be completed.
+	DeleteMember(listID, memberEmail string) error
+
+	// CreateWebhook creates a new Webhook and returns an error
+	// if the request could not be completed.
 	CreateWebhook(webhook Webhook) (Webhook, error)
+	// FetchWebhooks returns all the Webhooks that have been set
+	// up for the list with the given ID. An error is returned if
+	// the request could not be completed.
 	FetchWebhooks(listID string) ([]Webhook, error)
+	// FetchWebhook returns a Webhook based on the given list and
+	// Webhook IDs. An error is returned if the request could not
+	// be completed.
 	FetchWebhook(listID string, webookID string) (Webhook, error)
+	// FetchWebhook deletes a Webhook based on the given list and
+	// Webhook IDs. An error is returned if the request could not
+	// be completed.
 	DeleteWebhook(listID string, webhookID string) error
 }
 
@@ -222,6 +276,28 @@ func (c client) UpdateMemberTagsSync(listID, memberEmail string, tags []Tag) err
 			Tags:      tags,
 			IsSyncing: true,
 		},
+	)
+	return err
+}
+
+func (c client) ArchiveMember(listID, memberEmail string) error {
+	_, err := c.provider.Delete(
+		fmt.Sprintf(
+			"/lists/%s/members/%s",
+			listID,
+			hashMd5(strings.ToLower(memberEmail)),
+		),
+	)
+	return err
+}
+
+func (c client) DeleteMember(listID, memberEmail string) error {
+	_, err := c.provider.Delete(
+		fmt.Sprintf(
+			"/lists/%s/members/%s/actions/delete-permanent",
+			listID,
+			hashMd5(strings.ToLower(memberEmail)),
+		),
 	)
 	return err
 }
