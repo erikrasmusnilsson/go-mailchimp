@@ -202,6 +202,21 @@ if err := chimp.UpdateMemberTags("list-id", "member@email.com", tags); err != ni
 
 There is also another version of `UpdateMemberTags` called `UpdateMemberTagsSync`. Using `UpdateMemberTagsSync` will make sure that any automations at MailChimp based on tags are **not** ran during the update. Please note that this also means that using `UpdateMemberTags` to update the tags will cause these automations to run, if any are set up. Please note that both of these receiver functions will only return an error if one occured on the MailChimp API side.
 
+### Batching addition/removal of tags
+In order to add or remove several tags at once, or at least seemingly, you must use the clients `BatchOperations` method. This method takes a slice of `Operation` values, and to create such values for the addition/removal of tags you must use the `NewTagsOperation` function. An example is given below.
+
+```go
+chimp := mailchimp.NewClient("key", "region")
+tag1, _ := mailchimp.TagBuilder{}.Name("batched-tag-1").StatusActive()
+tag2, _ := mailchimp.TagBuilder{}.Name("batched-tag-2").StatusActive()
+tags := []mailchimp.Tag{tag1, tag2}
+
+op1, _ := mailchimp.NewTagsOperation("list-id", "your@email.com", tags)
+if err := chimp.BatchOperations([]mailchimp.Operation{op1}); err != nil {
+	handleErr(err)
+}
+```
+
 ## Webhooks
 It is possible to add Webhooks unto your MailChimp audience using the `mailchimp.Client`. To create a new client, simply call `mailchimp.NewClient` with the API key and region for your MailChimp account. After creating a client you can do add, fetch and delete Webhooks on your MailChimp audience. Each of these operations are described with examples below. 
 
