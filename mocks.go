@@ -50,6 +50,8 @@ type ClientMock struct {
 	BatchCalls           int
 	BatchWithUpdateMock  func(string, []Member) error
 	BatchWithUpdateCalls int
+	BatchOperationsMock  func(OperationCollection) error
+	BatchOperationsCalls int
 
 	FetchMemberTagsMock       func(string, string) ([]Tag, error)
 	FetchMemberTagsCalls      int
@@ -109,6 +111,11 @@ func (client *ClientMock) Batch(id string, members []Member) error {
 func (client *ClientMock) BatchWithUpdate(id string, members []Member) error {
 	client.BatchWithUpdateCalls++
 	return client.BatchWithUpdateMock(id, members)
+}
+
+func (client *ClientMock) BatchOperations(operations OperationCollection) error {
+	client.BatchOperationsCalls++
+	return client.BatchOperationsMock(operations)
 }
 
 func (client *ClientMock) FetchMemberTags(id, memberEmail string) ([]Tag, error) {

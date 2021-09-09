@@ -44,6 +44,9 @@ type Client interface {
 	// of a given ID. An error is returned if the request
 	// could not be completed.
 	BatchWithUpdate(listID string, members []Member) error
+	// BatchOperations is used to tell MailChimp to do several things
+	// with only one request.
+	BatchOperations(operations OperationCollection) error
 
 	// FetchMemberTags returns all the member tags for a given
 	// member based on the list ID and member email address. An
@@ -214,6 +217,21 @@ func (c client) batch(id string, members []Member, update bool) error {
 		UpdateExisting: update,
 	})
 	return err
+}
+
+type batchOperationsPayload struct {
+	Operations OperationCollection `json:"operations"`
+}
+
+func (c client) BatchOperations(operations OperationCollection) error {
+	_, err := c.provider.Post(
+		"/batches",
+		batchOperationsPayload{Operations: operations},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type memberTagsResponse struct {
