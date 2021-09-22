@@ -151,6 +151,17 @@ if err := chimp.BatchWithUpdate("list-id", members); err != nil {
 }
 ```
 
+## Update a member 
+Since most of MailChimp's identification is dependent on the members email address, it can be difficult to update this in a batch call. You can therefore perform such an operation using the `UpdateMember` method. 
+```go
+chimp := mailchimp.NewClient("key", "region")
+oldEmailAddress := "test@test.com"
+member := createMember() // member with updated email address
+if err := chimp.UpdateMember("list-id", oldEmailAddress, member); err != nil {
+    return handleErr(err)
+}
+```
+
 ## Archiving a member from a list
 First of all, make sure that you actually want to delete the member and not unsubscribe them.
 
