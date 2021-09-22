@@ -48,6 +48,10 @@ type Client interface {
 	// with only one request.
 	BatchOperations(operations OperationCollection) error
 
+	// UpdateMember is used to update information about a member such
+	// as their email address.
+	UpdateMember(listID, email string, member Member) error
+
 	// FetchMemberTags returns all the member tags for a given
 	// member based on the list ID and member email address. An
 	// error is returned if the request could not be completed.
@@ -227,6 +231,21 @@ func (c client) BatchOperations(operations OperationCollection) error {
 	_, err := c.provider.Post(
 		"/batches",
 		batchOperationsPayload{Operations: operations},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c client) UpdateMember(listID, email string, member Member) error {
+	_, err := c.provider.Patch(
+		fmt.Sprintf(
+			"/lists/%s/members/%s",
+			listID,
+			hashMd5(strings.ToLower(email)),
+		),
+		member,
 	)
 	if err != nil {
 		return err
