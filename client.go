@@ -48,7 +48,8 @@ type Client interface {
 	// with only one request.
 	BatchOperations(operations OperationCollection) error
 
-	// TODO: add comment
+	// UpdateMember is used to update information about a member such
+	// as their email address.
 	UpdateMember(listID, email string, member Member) error
 
 	// FetchMemberTags returns all the member tags for a given
